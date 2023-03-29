@@ -22,10 +22,10 @@ const userSchema = new mongoose.Schema(
     areaOfExpertise: [{ type: String }],
     profilePic: { type: String },
     uid: { type: Number },
-    // role: {
-    //   type: mongoose.Schema.Types.ObjectId,
-    //   ref: 'Role',
-    // },
+    role: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Role",
+    },
   },
   { timestamps: true }
 );

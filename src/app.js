@@ -11,9 +11,9 @@ const MongoStore = require("connect-mongo");
 
 const mongoose = require("mongoose");
 const UserRouter = require("./Routes/UsersRouter");
-const config = require("./configs/config");
+const env = require("./configs/dev");
 
-const url = config.mongoUrl;
+const url = env.mongoUrl;
 const connect = mongoose.connect(url);
 
 connect.then(
@@ -27,10 +27,10 @@ connect.then(
 
 app.use(
   expresssession({
-    secret: config.secretKey,
+    secret: env.secrectKey,
     resave: false,
     saveUninitialized: true,
-    store: new MongoStore({ mongoUrl: url }),
+    store: new MongoStore({ mongoUrl: env.mongoUrl }),
     // cookie: { secure: true }
   })
 );
