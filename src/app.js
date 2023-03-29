@@ -1,20 +1,64 @@
 const express = require("express");
-const helmet = require("helmet");
-const cors = require("cors");
+const createError = require("http-errors");
+const path = require("path");
+require("dotenv/config");
 
 const app = express();
+const cors = require("cors");
+const passport = require("passport");
+const expresssession = require("express-session");
+const MongoStore = require("connect-mongo");
 
-// A security package that helps protect against common vulnerabilities.
-app.use(helmet());
+const mongoose = require("mongoose");
+const UserRouter = require("./Routes/UsersRouter");
+const config = require("./configs/config");
 
-// It allows the server to accept requests from other domains.
-app.use(cors());
+const url = config.mongoUrl;
+const connect = mongoose.connect(url);
 
-// It allows the server to accept JSON data in the body of the request.
+connect.then(
+  () => {
+    console.log("connected Correctly");
+  },
+  (err) => {
+    console.log(err);
+  }
+);
+
+app.use(
+  expresssession({
+    secret: config.secretKey,
+    resave: false,
+    saveUninitialized: true,
+    store: new MongoStore({ mongoUrl: url }),
+    // cookie: { secure: true }
+  })
+);
+app.use(cors({ origin: "*" }));
+app.use(express.static("./assets"));
+app.use(express.static(path.join(__dirname, "public")));
 app.use(express.json());
-
-// It allows the server to accept URL encoded data in the body of the request.
 app.use(express.urlencoded({ extended: false }));
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.use("/user", UserRouter);
+
+app.use((req, res, next) => {
+  next(createError(404));
+});
+
+// error handler
+app.use((err, req, res) => {
+  res.status(err.status || 404);
+  res.json({
+    error: {
+      status: err.status || 404,
+      message: err.message || req.session.message,
+      success: false,
+    },
+  });
+});
 
 app.get("/healthcheck", (req, res) => {
   res.status(200).send("App is running!");
