@@ -49,6 +49,7 @@ passport.use(
       callbackUrl: "http://localhost:5000/user/login/callback",
     },
     (profile, done) => {
+      console.log("profile", profile);
       User.findOne({ email: profile.email }, (err, user) => {
         if (err) {
           console.log("errors", err);
