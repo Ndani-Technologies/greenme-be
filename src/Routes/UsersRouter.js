@@ -4,24 +4,39 @@ const UserRouter = express.Router();
 const passport = require("passport");
 const bodyParser = require("body-parser");
 const middleware = require("../middleware/middleware");
-
 const userController = require("../Controller/userController");
 
 UserRouter.post(
   "/login/callback",
   bodyParser.urlencoded({ extended: false }),
-  passport.authenticate("saml", {
+  passport.authenticate("login-saml", {
     failureRedirect: "/login",
     failureMessage: "error",
   }),
   userController.loginCallback
 );
 
-UserRouter.get("/login", passport.authenticate("saml"), userController.login);
+UserRouter.get(
+  "/login",
+  passport.authenticate("login-saml"),
+  userController.login
+);
 
-UserRouter.get("/", middleware.isAdmin, userController.getAllUsers);
+UserRouter.get("/signup", passport.authenticate("register-saml"));
 
-UserRouter.get("/user:id", middleware.isAdmin, userController.getUserById);
+UserRouter.post(
+  "/signup/callback",
+  bodyParser.urlencoded({ extended: false }),
+  passport.authenticate("resgister-saml", {
+    failureRedirect: "/signup",
+    failureMessage: "error",
+  }),
+  userController.registerCallback
+);
+
+UserRouter.get("/", userController.getAllUsers);
+
+UserRouter.get("/user:id", userController.getUserById);
 
 UserRouter.post("/", middleware.isAdmin, userController.createUser);
 

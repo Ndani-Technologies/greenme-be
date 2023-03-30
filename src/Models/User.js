@@ -26,6 +26,10 @@ const userSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Role",
     },
+    timezone: {
+      type: String,
+      default: "GMT",
+    },
   },
   { timestamps: true }
 );

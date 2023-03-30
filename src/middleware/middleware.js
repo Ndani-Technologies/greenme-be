@@ -11,8 +11,6 @@ const idpConfig = require("../configs/config");
 const config = require("../configs/config");
 const User = require("../Models/User");
 
-// exports.local = passport.use(new LocalStrategy(User.authenticate()));
-
 passport.serializeUser((req, user, done) => {
   // done(null, user.uid);
   done(null, user._id);
@@ -33,13 +31,12 @@ passport.deserializeUser((id, done) => {
 
 const spOptions = {
   entity_id: idpConfig.local.entity,
-  // private_key: fs.readFileSync("./assets/certificates/server.pem").toString(),
-  // certificate: fs.readFileSync("./assets/certificates/server.crt").toString(),
-  // assert_endpoint: idpConfig["local"].assert,
-  // allow_unencrypted_assertion: true,
 };
 const loginUrl = `https://login.fleetforum.org/saml2/idp/SSOService.php?spentityid=${spOptions.entity_id}`;
+const registerUrl =
+  "https://knowledge.fleetforum.org/sso-sign-up?spentityid=knowledge.fleetforum.org";
 passport.use(
+  "login-saml",
   new SamlStrategy(
     {
       path: "/user/login/callback",
@@ -49,7 +46,6 @@ passport.use(
       callbackUrl: "http://localhost:5000/user/login/callback",
     },
     (profile, done) => {
-      console.log("profile", profile);
       User.findOne({ email: profile.email }, (err, user) => {
         if (err) {
           console.log("errors", err);
@@ -82,28 +78,57 @@ passport.use(
   )
 );
 
-// passport.use(new LocalStrategy(
-//     function (username, password, done, next) {
-//         User.findOne({ username: username }, function (err, user) {
-//             if (err) {
-//                 return done(err, false, { message: "Invalid Email or password" })
-//             } else if (user) {
-//                 return done(null, user);
-//             } else {
-//                 return done(null, false, { message: "User Does not exist." });
-//             }
-//         });
-//     }
-// ));
+passport.use(
+  "register-saml",
+  new SamlStrategy(
+    {
+      path: "/user/register/callback",
+      entryPoint: registerUrl,
+      issuer: "passport-saml",
+      cert: fs.readFileSync("./src/assets/idp.crt", "utf-8"),
+      callbackUrl: "http://localhost:5000/user/register/callback",
+    },
+    (profile, done) => {
+      User.findOne({ email: profile.email }, (err, user) => {
+        if (err) {
+          console.log("errors", err);
+          return done(err);
+        }
+        if (!user) {
+          User.create(
+            {
+              email: profile.email,
+              uid: profile.uid,
+              state: profile.state,
+              organization: profile.organization,
+              firstName: profile.firstName,
+              lastName: profile.lastName,
+              areasOfExpertise: profile.areasOfExpertise,
+              profilePic: profile.profilePic,
+            },
+            (error, newUser) => {
+              if (error) {
+                console.log("errors", err);
+                return done(err);
+              }
+              return done(null, newUser);
+            }
+          );
+        }
+        return done(null, user);
+      });
+    }
+  )
+);
 
-exports.getToken = (user) =>
+const getToken = (user) =>
   jwt.sign(user, config.secretKey, { expiresIn: 3600 });
-exports.checkLogin = (req, res, next) => {
+const checkLogin = (req, res, next) => {
   if (req.isAuthenticated()) {
     next();
   } else next(new Error("Already Logout."));
 };
-exports.isLocalAuthenticated = function (req, res, next) {
+const isLocalAuthenticated = function (req, res, next) {
   passport.authenticate("local", (err, user) => {
     if (err) {
       return next(err);
@@ -114,7 +139,7 @@ exports.isLocalAuthenticated = function (req, res, next) {
     next();
   })(req, res, next);
 };
-exports.isAdmin = (req, res, next) => {
+const isAdmin = (req, res, next) => {
   console.log("user", req.user);
   try {
     User.findOne({ _id: req.user })
@@ -153,4 +178,10 @@ exports.isAdmin = (req, res, next) => {
     error.status = 403;
     next(err);
   }
+};
+module.exports = {
+  getToken,
+  isAdmin,
+  isLocalAuthenticated,
+  checkLogin,
 };
