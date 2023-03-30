@@ -1,3 +1,4 @@
+const axios = require("axios");
 const User = require("../Models/User");
 
 const login = async () => {
@@ -5,6 +6,9 @@ const login = async () => {
 };
 
 const loginCallback = async (req, res) => {
+  res.json({ user: req.user });
+};
+const registerCallback = async (req, res) => {
   res.json({ user: req.user });
 };
 const getAllUsers = async (req, res, next) => {
@@ -73,17 +77,60 @@ const createUser = async (req, res, next) => {
   }
 };
 
+// const userUpdate = async (req, res, next) => {
+
+//   User.findByIdAndUpdate(req.params.id, { $set: req.body }, { new: true })
+//     .then(
+//       () => {
+//         res.statusCode = 200;
+//         res.setHeader("Content-Type", "application/json");
+//         res.json({ success: true, message: "User Updated" });
+//       },
+//       (err) => next(err)
+//     )
+//     .catch((err) => next(err));
+// };
+
 const userUpdate = async (req, res, next) => {
-  User.findByIdAndUpdate(req.params.id, { $set: req.body }, { new: true })
-    .then(
-      () => {
-        res.statusCode = 200;
-        res.setHeader("Content-Type", "application/json");
-        res.json({ success: true, message: "User Updated" });
-      },
-      (err) => next(err)
-    )
-    .catch((err) => next(err));
+  const user = await User.findById(req.params.id);
+
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      message: "User not found",
+    });
+  }
+
+  let timezone;
+  if (user.country) {
+    try {
+      const response = await axios.get(
+        `https://timezone.abstractapi.com/v1/current_time/?api_key=d74cb0a9bdca4d53b0717d36559bc603&location=${user.country}`
+      );
+      timezone = response.data.gmt_offset;
+    } catch (error) {
+      return next(error);
+    }
+  } else {
+    try {
+      const response = await axios.get(
+        `https://timezone.abstractapi.com/v1/current_time/?api_key=d74cb0a9bdca4d53b0717d36559bc603&location=${req.body.country}`
+      );
+      timezone = `GMT ${response.data.gmt_offset}`;
+    } catch (error) {
+      return next(error);
+    }
+  }
+  try {
+    await User.findByIdAndUpdate(
+      req.params.id,
+      { $set: { ...req.body, timezone } },
+      { new: true }
+    );
+    res.status(200).json({ success: true, message: "User updated" });
+  } catch (error) {
+    return next(error);
+  }
 };
 
 const userDelete = async (req, res, next) => {
@@ -107,4 +154,5 @@ module.exports = {
   createUser,
   userUpdate,
   userDelete,
+  registerCallback,
 };
