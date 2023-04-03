@@ -9,8 +9,11 @@ const passport = require("passport");
 const expresssession = require("express-session");
 const MongoStore = require("connect-mongo");
 
+const swaggerUi = require("swagger-ui-express");
+const swaggerJSDoc = require("swagger-jsdoc");
+
 const mongoose = require("mongoose");
-const UserRouter = require("./Routes/UsersRouter");
+const UserRouter = require("./routes/UsersRouter");
 const env = require("./configs/dev");
 
 const url = env.mongoUrl;
@@ -41,6 +44,35 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(passport.initialize());
 app.use(passport.session());
+
+const swaggerOptions = {
+  definition: {
+    openapi: "3.0.0",
+    info: {
+      title: "LogRocket Express API with Swagger",
+      version: "0.1.0",
+      description:
+        "This is a simple CRUD API application made with Express and documented with Swagger",
+    },
+    servers: [
+      {
+        url: "http://localhost:5000",
+      },
+    ],
+  },
+  apis: ["src/routes/UsersRouter.js"],
+};
+const swaggerSpec = swaggerJSDoc(swaggerOptions);
+
+app.get("/api-docs.json", (req, res) => {
+  res.setHeader("Content-Type", "application/json");
+  res.send(swaggerSpec);
+});
+app.use(
+  "/api-docs",
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerSpec, { explorer: true })
+);
 
 app.use("/user", UserRouter);
 
