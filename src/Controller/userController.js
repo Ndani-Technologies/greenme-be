@@ -1,5 +1,6 @@
 const axios = require("axios");
 const User = require("../Models/User");
+const env = require("../configs/dev");
 
 const login = async () => {
   // res.json(req.user);
@@ -77,20 +78,6 @@ const createUser = async (req, res, next) => {
   }
 };
 
-// const userUpdate = async (req, res, next) => {
-
-//   User.findByIdAndUpdate(req.params.id, { $set: req.body }, { new: true })
-//     .then(
-//       () => {
-//         res.statusCode = 200;
-//         res.setHeader("Content-Type", "application/json");
-//         res.json({ success: true, message: "User Updated" });
-//       },
-//       (err) => next(err)
-//     )
-//     .catch((err) => next(err));
-// };
-
 const userUpdate = async (req, res, next) => {
   const user = await User.findById(req.params.id);
 
@@ -105,7 +92,7 @@ const userUpdate = async (req, res, next) => {
   if (user.country) {
     try {
       const response = await axios.get(
-        `https://timezone.abstractapi.com/v1/current_time/?api_key=d74cb0a9bdca4d53b0717d36559bc603&location=${user.country}`
+        `https://timezone.abstractapi.com/v1/current_time/?api_key=${env.timezoneKey}=${user.country}`
       );
       timezone = response.data.gmt_offset;
     } catch (error) {
@@ -114,7 +101,7 @@ const userUpdate = async (req, res, next) => {
   } else {
     try {
       const response = await axios.get(
-        `https://timezone.abstractapi.com/v1/current_time/?api_key=d74cb0a9bdca4d53b0717d36559bc603&location=${req.body.country}`
+        `https://timezone.abstractapi.com/v1/current_time/?api_key=${env.timezoneKey}=${req.body.country}`
       );
       timezone = `GMT ${response.data.gmt_offset}`;
     } catch (error) {
