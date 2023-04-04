@@ -1,4 +1,3 @@
-// const middleware = require('../middleware')
 const Permissions = require("../Models/Permission");
 
 const getAllPermissions = (req, res, next) => {

@@ -4,6 +4,8 @@ const devEnv = {
   secrectKey: process.env.SECRET_KEY,
   mongoUrl: process.env.MONGO_URL,
   timezoneKey: process.env.TIMEZONE_KEY,
+  loginUrl: process.env.LOGIN_URL,
+  registerUrl: process.env.REGISTER_URL,
 };
 
 module.exports = devEnv;

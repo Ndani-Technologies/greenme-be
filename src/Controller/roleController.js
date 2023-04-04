@@ -1,5 +1,5 @@
 const Role = require("../Models/Role");
-// const middleware = require("../middleware")
+
 const getAllRoles = (req, res, next) => {
   Role.find({})
     .populate("permissions")
