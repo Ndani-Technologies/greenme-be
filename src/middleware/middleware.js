@@ -1,7 +1,3 @@
-// const LocalStrategy = require('passport-local').Strategy;
-// const jwtStrategy = require('passport-jwt').Strategy;
-// const Extractjwt = require('passport-jwt').ExtractJwt;
-// var path = require('path')
 const passport = require("passport");
 const { default: mongoose } = require("mongoose");
 const jwt = require("jsonwebtoken");
@@ -10,9 +6,9 @@ const fs = require("fs");
 const idpConfig = require("../configs/config");
 const config = require("../configs/config");
 const User = require("../Models/User");
+const env = require("../configs/dev");
 
 passport.serializeUser((req, user, done) => {
-  // done(null, user.uid);
   done(null, user._id);
 });
 
@@ -24,7 +20,6 @@ passport.deserializeUser((id, done) => {
     if (err) {
       done(err);
     }
-    // done(err, user.uid);
     done(null, user._id);
   });
 });
@@ -32,9 +27,9 @@ passport.deserializeUser((id, done) => {
 const spOptions = {
   entity_id: idpConfig.local.entity,
 };
-const loginUrl = `https://login.fleetforum.org/saml2/idp/SSOService.php?spentityid=${spOptions.entity_id}`;
-const registerUrl =
-  "https://knowledge.fleetforum.org/sso-sign-up?spentityid=knowledge.fleetforum.org";
+const loginUrl = env.loginUrl + spOptions.entity_id;
+const { registerUrl } = env;
+
 passport.use(
   "login-saml",
   new SamlStrategy(
@@ -65,7 +60,6 @@ passport.use(
             },
             (error, newUser) => {
               if (error) {
-                console.log("errors", err);
                 return done(err);
               }
               return done(null, newUser);
@@ -91,7 +85,6 @@ passport.use(
     (profile, done) => {
       User.findOne({ email: profile.email }, (err, user) => {
         if (err) {
-          console.log("errors", err);
           return done(err);
         }
         if (!user) {
@@ -108,7 +101,6 @@ passport.use(
             },
             (error, newUser) => {
               if (error) {
-                console.log("errors", err);
                 return done(err);
               }
               return done(null, newUser);
@@ -140,7 +132,6 @@ const isLocalAuthenticated = function (req, res, next) {
   })(req, res, next);
 };
 const isAdmin = (req, res, next) => {
-  console.log("user", req.user);
   try {
     User.findOne({ _id: req.user })
       .populate("role")
@@ -168,7 +159,6 @@ const isAdmin = (req, res, next) => {
         }
       )
       .catch((err) => {
-        console.log("err", err);
         next(err);
       });
   } catch (err) {

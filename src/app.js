@@ -24,7 +24,7 @@ connect.then(
     console.log("connected Correctly");
   },
   (err) => {
-    console.log(err);
+    console.error(err);
   }
 );
 
@@ -34,7 +34,6 @@ app.use(
     resave: false,
     saveUninitialized: true,
     store: new MongoStore({ mongoUrl: env.mongoUrl }),
-    // cookie: { secure: true }
   })
 );
 app.use(cors({ origin: "*" }));
@@ -49,14 +48,13 @@ const swaggerOptions = {
   definition: {
     openapi: "3.0.0",
     info: {
-      title: "LogRocket Express API with Swagger",
+      title: "Green-Me Official",
       version: "0.1.0",
-      description:
-        "This is a simple CRUD API application made with Express and documented with Swagger",
+      description: "API Routes and Database Schema for GreenMe-Official",
     },
     servers: [
       {
-        url: "http://localhost:5000",
+        url: `http://${env.host}/${env.port}`,
       },
     ],
   },
