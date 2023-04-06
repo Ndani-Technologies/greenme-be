@@ -61,21 +61,19 @@ const getUserById = async (req, res, next) => {
 
 const createUser = async (req, res, next) => {
   const user = new User(req.body);
-
-  try {
-    User.create(user)
-      .then(
-        (newUser) => {
-          res
-            .status(201)
-            .json({ success: true, message: "User created", data: newUser });
-        },
-        (err) => next(err)
-      )
-      .catch((err) => next(err));
-  } catch (err) {
-    next(err);
-  }
+  User.create(user)
+    .then(
+      (newUser) => {
+        res
+          .status(201)
+          .json({ success: true, message: "User created", data: newUser });
+      },
+      (err) => next(err)
+    )
+    .catch((err) => {
+      console.log("err2", err);
+      next(err);
+    });
 };
 
 const userUpdate = async (req, res, next) => {
@@ -88,39 +86,46 @@ const userUpdate = async (req, res, next) => {
     });
   }
 
-  let timezone;
-  if (user.country) {
-    try {
-      const response = await axios.get(
-        `https://timezone.abstractapi.com/v1/current_time/?api_key=${env.timezoneKey}=${user.country}`
-      );
-      timezone = response.data.gmt_offset;
-    } catch (error) {
-      return next(error);
-    }
-  } else {
-    try {
-      const response = await axios.get(
-        `https://timezone.abstractapi.com/v1/current_time/?api_key=${env.timezoneKey}=${req.body.country}`
-      );
-      timezone = `GMT ${response.data.gmt_offset}`;
-    } catch (error) {
-      return next(error);
+  const { body } = req;
+  if (body.timezone) {
+    if (user.country) {
+      try {
+        const response = await axios.get(
+          `https://timezone.abstractapi.com/v1/current_time/?api_key=${env.timezoneKey}=${user.country}`
+        );
+        body.timezone = response.data.gmt_offset;
+      } catch (error) {
+        return next(error);
+      }
+    } else {
+      try {
+        const response = await axios.get(
+          `https://timezone.abstractapi.com/v1/current_time/?api_key=${env.timezoneKey}=${req.body.country}`
+        );
+        body.timezone = `GMT ${response.data.gmt_offset}`;
+      } catch (error) {
+        return next(error);
+      }
     }
   }
-  try {
-    await User.findByIdAndUpdate(
-      req.params.id,
-      { $set: { ...req.body, timezone } },
-      { new: true }
-    );
-    res.status(200).json({ success: true, message: "User updated" });
-  } catch (error) {
-    return next(error);
-  }
+
+  user.set(body);
+
+  user
+    .save()
+    .then(() => {
+      res.status(200).json({ success: true, message: "User updated" });
+    })
+    .catch((err) => next(err));
 };
 
 const userDelete = async (req, res, next) => {
+  const user = await User.findById(req.params.id);
+  if (!user) {
+    res.statusCode = 200;
+    res.setHeader("Content-Type", "application/json");
+    res.json({ success: true, message: "User Doesn't exist" });
+  }
   User.findByIdAndDelete(req.params.id)
     .then(
       () => {
