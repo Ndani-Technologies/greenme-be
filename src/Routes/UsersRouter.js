@@ -16,11 +16,7 @@ UserRouter.post(
   userController.loginCallback
 );
 
-UserRouter.get(
-  "/login",
-  passport.authenticate("login-saml"),
-  userController.login
-);
+UserRouter.get("/login", passport.authenticate("login-saml"));
 
 UserRouter.get("/signup", passport.authenticate("register-saml"));
 

@@ -8,7 +8,7 @@ const getAllPermissions = (req, res, next) => {
       },
       (err) => next(err)
     )
-    .catch(() => next(new Error("Couldn't get all Permissions")));
+    .catch(() => next(new Error("Couldn't retrieve permission")));
 };
 const createPermission = (req, res, next) => {
   const newPermission = new Permissions({
@@ -22,7 +22,7 @@ const createPermission = (req, res, next) => {
       },
       (err) => next(err)
     )
-    .catch(() => next(new Error("Couldn't Create Premission")));
+    .catch(() => next(new Error("Couldn't Create Permission")));
 };
 
 const updatePermission = (req, res, next) => {

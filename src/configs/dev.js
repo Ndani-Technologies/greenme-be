@@ -1,6 +1,6 @@
 const devEnv = {
   host: process.env.HOST || "localhost",
-  port: process.env.PORT || 5000,
+  port: process.env.PORT || 8001,
   secrectKey: process.env.SECRET_KEY,
   mongoUrl: process.env.MONGO_URL,
   timezoneKey: process.env.TIMEZONE_KEY,
