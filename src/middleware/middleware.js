@@ -34,7 +34,7 @@ passport.use(
   "login-saml",
   new SamlStrategy(
     {
-      path: "/user/login/callback",
+      path: "/login/callback",
       entryPoint: loginUrl,
       issuer: "passport-saml",
       cert: fs.readFileSync("./src/assets/idp.crt", "utf-8"),
@@ -76,11 +76,11 @@ passport.use(
   "register-saml",
   new SamlStrategy(
     {
-      path: "/user/register/callback",
+      path: "/register/callback",
       entryPoint: registerUrl,
       issuer: "passport-saml",
       cert: fs.readFileSync("./src/assets/idp.crt", "utf-8"),
-      callbackUrl: "http://localhost:5000/user/register/callback",
+      callbackUrl: "http://localhost:5001/register/callback",
     },
     (profile, done) => {
       User.findOne({ email: profile.email }, (err, user) => {

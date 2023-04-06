@@ -15,6 +15,8 @@ const swaggerJSDoc = require("swagger-jsdoc");
 const mongoose = require("mongoose");
 const UserRouter = require("./Routes/UsersRouter");
 const env = require("./configs/dev");
+const roleRouter = require("./Routes/RoleRouter");
+const permissionRouter = require("./Routes/PermissionRouter");
 
 const url = env.mongoUrl;
 const connect = mongoose.connect(url);
@@ -72,7 +74,9 @@ app.use(
   swaggerUi.setup(swaggerSpec, { explorer: true })
 );
 
-app.use("/", UserRouter);
+app.use("/user", UserRouter);
+app.use("/role", roleRouter);
+app.use("/permission", permissionRouter);
 
 app.use((req, res, next) => {
   next(createError(404));
@@ -80,11 +84,22 @@ app.use((req, res, next) => {
 
 // error handler
 app.use((err, req, res) => {
-  res.status(err.status || 404);
-  res.json({
+  let status = err.status || 500;
+  let message = err.message || "Internal Server Error";
+  console.log("error", err);
+
+  if (err.name === "MongoServerError" && err.code === 11000) {
+    status = 400;
+    message = "Duplicate key error";
+  } else if (err.name === "ValidationError") {
+    status = 400;
+    message = err.message;
+  }
+
+  res.status(status).json({
     error: {
-      status: err.status || 404,
-      message: err.message || req.session.message,
+      status,
+      message,
       success: false,
     },
   });

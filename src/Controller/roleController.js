@@ -32,23 +32,29 @@ const createRole = (req, res, next) => {
 const updateRole = (req, res, next) => {
   Role.findByIdAndUpdate(req.params.id, { $set: req.body }, { new: true })
     .then(
-      (role) => {
+      () => {
         res.statusCode = 200;
         res.setHeader("Content-Type", "application/json");
-        res.json(role);
+        res.json({ success: true, message: "role updated" });
       },
       (err) => next(err)
     )
     .catch((err) => next(err));
 };
 
-const deleteRole = (req, res, next) => {
+const deleteRole = async (req, res, next) => {
+  const role = await Role.findById(req.params.id);
+  if (!role) {
+    res.statusCode = 200;
+    res.setHeader("Content-Type", "application/json");
+    res.json({ success: true, message: "role is already deleted" });
+  }
   Role.findByIdAndDelete(req.params.id)
     .then(
-      (role) => {
+      () => {
         res.statusCode = 200;
         res.setHeader("Content-Type", "application/json");
-        res.json(role);
+        res.json({ success: true, message: "role deleted" });
       },
       (err) => next(err)
     )

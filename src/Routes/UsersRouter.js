@@ -3,7 +3,6 @@ const express = require("express");
 const UserRouter = express.Router();
 const passport = require("passport");
 const bodyParser = require("body-parser");
-const middleware = require("../middleware/middleware");
 const userController = require("../Controller/userController");
 
 UserRouter.post(
@@ -197,10 +196,10 @@ UserRouter.get("/", userController.getAllUsers);
 
 UserRouter.get("/user:id", userController.getUserById);
 
-UserRouter.post("/", middleware.isAdmin, userController.createUser);
+UserRouter.post("/", userController.createUser);
 
 UserRouter.patch("/:id", userController.userUpdate);
 
-UserRouter.delete("/:id", middleware.isAdmin, userController.userDelete);
+UserRouter.delete("/:id", userController.userDelete);
 
 module.exports = UserRouter;
