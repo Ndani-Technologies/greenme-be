@@ -20,7 +20,9 @@ const createRole = (req, res, next) => {
   Role.create(newRole)
     .then(
       (role) => {
-        res.status(200).json(role);
+        res
+          .status(201)
+          .json({ success: true, message: "Role created", data: role });
       },
       (err) => next(err)
     )

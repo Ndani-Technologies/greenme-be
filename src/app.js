@@ -13,7 +13,7 @@ const swaggerUi = require("swagger-ui-express");
 const swaggerJSDoc = require("swagger-jsdoc");
 
 const mongoose = require("mongoose");
-const UserRouter = require("./routes/UsersRouter");
+const UserRouter = require("./Routes/UsersRouter");
 const env = require("./configs/dev");
 
 const url = env.mongoUrl;
@@ -72,7 +72,7 @@ app.use(
   swaggerUi.setup(swaggerSpec, { explorer: true })
 );
 
-app.use("/user", UserRouter);
+app.use("/", UserRouter);
 
 app.use((req, res, next) => {
   next(createError(404));
