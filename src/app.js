@@ -5,7 +5,8 @@ require("dotenv/config");
 
 const app = express();
 const cors = require("cors");
-const passport = require("passport");
+// const passport = require("passport");
+
 const expresssession = require("express-session");
 const MongoStore = require("connect-mongo");
 
@@ -13,6 +14,7 @@ const swaggerUi = require("swagger-ui-express");
 const swaggerJSDoc = require("swagger-jsdoc");
 
 const mongoose = require("mongoose");
+const passport = require("./middleware/passport");
 const UserRouter = require("./Routes/UsersRouter");
 const env = require("./configs/dev");
 const roleRouter = require("./Routes/RoleRouter");
