@@ -2,10 +2,6 @@ const axios = require("axios");
 const User = require("../Models/User");
 const env = require("../configs/dev");
 
-const login = async () => {
-  // res.json(req.user);
-};
-
 const loginCallback = async (req, res) => {
   res.json({ user: req.user });
 };
@@ -139,7 +135,6 @@ const userDelete = async (req, res, next) => {
 };
 
 module.exports = {
-  login,
   loginCallback,
   getAllUsers,
   getUserById,

@@ -4,7 +4,13 @@ const getAllPermissions = (req, res, next) => {
   Permissions.find({})
     .then(
       (permisssions) => {
-        res.status(200).json(permisssions);
+        res
+          .status(200)
+          .json({
+            success: true,
+            message: "Permissions retrieved",
+            data: permisssions,
+          });
       },
       (err) => next(err)
     )
@@ -17,8 +23,14 @@ const createPermission = (req, res, next) => {
   });
   Permissions.create(newPermission)
     .then(
-      (permisssions) => {
-        res.status(200).json(permisssions);
+      (permission) => {
+        res
+          .status(201)
+          .json({
+            success: true,
+            message: "Permission created",
+            data: permission,
+          });
       },
       (err) => next(err)
     )
@@ -32,10 +44,10 @@ const updatePermission = (req, res, next) => {
     { new: true }
   )
     .then(
-      (permission) => {
+      () => {
         res.statusCode = 200;
         res.setHeader("Content-Type", "application/json");
-        res.json(permission);
+        res.json({ success: true, message: "Permission updated" });
       },
       (err) => next(err)
     )
@@ -53,7 +65,7 @@ const deletePermission = async (req, res, next) => {
       () => {
         res.statusCode = 200;
         res.setHeader("Content-Type", "application/json");
-        res.json({ success: true, message: "permission deleted" });
+        res.json({ success: true, message: "Permission deleted" });
       },
       (err) => next(err)
     )

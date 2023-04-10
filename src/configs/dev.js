@@ -6,6 +6,7 @@ const devEnv = {
   timezoneKey: process.env.TIMEZONE_KEY,
   loginUrl: process.env.LOGIN_URL,
   registerUrl: process.env.REGISTER_URL,
+  idpCertificate: process.env.IDP_CERTIFICATE,
 };
 
 module.exports = devEnv;

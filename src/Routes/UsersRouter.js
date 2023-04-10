@@ -1,8 +1,8 @@
 const express = require("express");
 
 const UserRouter = express.Router();
-const passport = require("passport");
 const bodyParser = require("body-parser");
+const passport = require("../middleware/passport");
 const userController = require("../Controller/userController");
 
 UserRouter.post(

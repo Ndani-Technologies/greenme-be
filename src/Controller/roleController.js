@@ -5,11 +5,13 @@ const getAllRoles = (req, res, next) => {
     .populate("permissions")
     .then(
       (roles) => {
-        res.status(200).json(roles);
+        res
+          .status(200)
+          .json({ success: true, message: "Role retrieved", data: roles });
       },
       (err) => next(err)
     )
-    .catch(() => next(new Error("Cannot get all Role")));
+    .catch(() => next(new Error("Can't retrieve all roles")));
 };
 
 const createRole = (req, res, next) => {
