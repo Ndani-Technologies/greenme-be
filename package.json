@@ -4,8 +4,8 @@
   "description": "Backend service js starter pack",
   "main": "./src/server.js",
   "scripts": {
-    "start": "nodemon ./src/server",
-    "dev": "set NODE_ENV=production && nodemon ./src/server",
+    "start": "set NODE_ENV=production && node ./src/server",
+    "dev": "nodemon ./src/server",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prepare": "husky install",
