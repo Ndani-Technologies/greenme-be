@@ -1,7 +1,7 @@
 const axios = require("axios");
 const User = require("../Models/User");
 const env = require("../configs/dev");
-// const { SET_ASYNC, GET_ASYNC } = require("../middleware/redisClient");
+const { redisClient } = require("../middleware/redisClient");
 
 const loginCallback = async (req, res) => {
   res.json({ user: req.user });
@@ -10,17 +10,17 @@ const registerCallback = async (req, res) => {
   res.json({ user: req.user });
 };
 const getAllUsers = async (req, res, next) => {
-  console.log("here");
   try {
-    console.log("user");
-    // const cache = await GET_ASYNC("GET_USERS")
-    // if(cache){
-    //   console.log("cache found")
-    //   res
-    //   .status(200)
-    //   .json({ success: true, message: "Users found", data: cache });
-    //   return;
-    // }
+    const cacheKey = "USERS";
+    const cache = await redisClient.get(cacheKey);
+    if (cache) {
+      res.status(200).json({
+        success: true,
+        message: "Users found",
+        data: JSON.parse(cache),
+      });
+      return;
+    }
     User.find()
       .populate("role")
       .populate({
@@ -32,7 +32,7 @@ const getAllUsers = async (req, res, next) => {
       })
       .then(
         async (users) => {
-          // const saveResult = await SET_ASYNC("GET_USERS", JSON.stringify(users), 'EX', 30)
+          await redisClient.set(cacheKey, JSON.stringify(users));
           res
             .status(200)
             .json({ success: true, message: "Users found", data: users });
@@ -79,7 +79,6 @@ const createUser = async (req, res, next) => {
       (err) => next(err)
     )
     .catch((err) => {
-      console.log("err2", err);
       next(err);
     });
 };

@@ -1,20 +1,33 @@
+const { redisClient } = require("../middleware/redisClient");
 const Permissions = require("../Models/Permission");
 
-const getAllPermissions = (req, res, next) => {
-  Permissions.find({})
-    .then(
-      (permisssions) => {
-        res
-          .status(200)
-          .json({
+const getAllPermissions = async (req, res, next) => {
+  try {
+    const cache = await redisClient.get("PERMISSION");
+    if (cache) {
+      res.status(200).json({
+        success: true,
+        message: "Permissions retrieved",
+        data: JSON.parse(cache),
+      });
+      return;
+    }
+    Permissions.find({})
+      .then(
+        (permisssions) => {
+          redisClient.set("PERMISSION", JSON.stringify(permisssions));
+          res.status(200).json({
             success: true,
             message: "Permissions retrieved",
             data: permisssions,
           });
-      },
-      (err) => next(err)
-    )
-    .catch(() => next(new Error("Couldn't retrieve permission")));
+        },
+        (err) => next(err)
+      )
+      .catch(() => next(new Error("Couldn't retrieve permission")));
+  } catch (err) {
+    next(new Error("Permission not retrieved"));
+  }
 };
 const createPermission = (req, res, next) => {
   const newPermission = new Permissions({
@@ -24,13 +37,11 @@ const createPermission = (req, res, next) => {
   Permissions.create(newPermission)
     .then(
       (permission) => {
-        res
-          .status(201)
-          .json({
-            success: true,
-            message: "Permission created",
-            data: permission,
-          });
+        res.status(201).json({
+          success: true,
+          message: "Permission created",
+          data: permission,
+        });
       },
       (err) => next(err)
     )
