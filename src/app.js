@@ -5,11 +5,12 @@ require("dotenv/config");
 
 const app = express();
 const cors = require("cors");
-// const passport = require("passport");
 
 const expresssession = require("express-session");
 const MongoStore = require("connect-mongo");
 
+// const redisClient = require("./middleware/redisClient")
+const responseTime = require("response-time");
 const swaggerUi = require("swagger-ui-express");
 const swaggerJSDoc = require("swagger-jsdoc");
 
@@ -26,6 +27,7 @@ const connect = mongoose.connect(url);
 connect.then(
   () => {
     console.log("connected Correctly");
+    console.log("check", mongoose.connection.readyState);
   },
   (err) => {
     console.error(err);
@@ -40,13 +42,14 @@ app.use(
     store: new MongoStore({ mongoUrl: env.mongoUrl }),
   })
 );
-app.use(cors({ origin: "*" }));
+app.use(cors());
 app.use(express.static("./assets"));
 app.use(express.static(path.join(__dirname, "public")));
-app.use(express.json());
+app.use(express.json({ extended: false }));
 app.use(express.urlencoded({ extended: false }));
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(responseTime);
 
 const swaggerOptions = {
   definition: {
@@ -76,10 +79,13 @@ app.use(
   swaggerUi.setup(swaggerSpec, { explorer: true })
 );
 
-app.use("/user", UserRouter);
+app.use("/users", UserRouter);
 app.use("/role", roleRouter);
 app.use("/permission", permissionRouter);
-
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url} at ${new Date()}`);
+  next();
+});
 app.use((req, res, next) => {
   next(createError(404));
 });

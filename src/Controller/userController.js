@@ -1,6 +1,7 @@
 const axios = require("axios");
 const User = require("../Models/User");
 const env = require("../configs/dev");
+// const { SET_ASYNC, GET_ASYNC } = require("../middleware/redisClient");
 
 const loginCallback = async (req, res) => {
   res.json({ user: req.user });
@@ -9,7 +10,17 @@ const registerCallback = async (req, res) => {
   res.json({ user: req.user });
 };
 const getAllUsers = async (req, res, next) => {
+  console.log("here");
   try {
+    console.log("user");
+    // const cache = await GET_ASYNC("GET_USERS")
+    // if(cache){
+    //   console.log("cache found")
+    //   res
+    //   .status(200)
+    //   .json({ success: true, message: "Users found", data: cache });
+    //   return;
+    // }
     User.find()
       .populate("role")
       .populate({
@@ -20,7 +31,8 @@ const getAllUsers = async (req, res, next) => {
         },
       })
       .then(
-        (users) => {
+        async (users) => {
+          // const saveResult = await SET_ASYNC("GET_USERS", JSON.stringify(users), 'EX', 30)
           res
             .status(200)
             .json({ success: true, message: "Users found", data: users });
