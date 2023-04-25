@@ -2,6 +2,8 @@ const express = require("express");
 const helmet = require("helmet");
 const cors = require("cors");
 
+const healthcheck = require("./routes/healthcheck");
+
 const app = express();
 
 // A security package that helps protect against common vulnerabilities.
@@ -16,8 +18,6 @@ app.use(express.json());
 // It allows the server to accept URL encoded data in the body of the request.
 app.use(express.urlencoded({ extended: false }));
 
-app.get("/healthcheck", (req, res) => {
-  res.status(200).send("App is running!");
-});
+app.use(healthcheck);
 
 module.exports = app;
