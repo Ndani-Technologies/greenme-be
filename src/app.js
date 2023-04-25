@@ -16,4 +16,8 @@ app.use(express.json());
 // It allows the server to accept URL encoded data in the body of the request.
 app.use(express.urlencoded({ extended: false }));
 
+app.get("/healthcheck", (req, res) => {
+  res.status(200).send("App is running!");
+});
+
 module.exports = app;
