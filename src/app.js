@@ -76,6 +76,7 @@ app.get("/api-docs.json", (req, res) => {
   res.send(swaggerSpec);
 });
 app.use("/api/v1/user", UserRouter);
+// app.use("/user", UserRouter)
 app.use("/api/v1/role", roleRouter);
 app.use("/api/v1/permission", permissionRouter);
 
@@ -95,7 +96,7 @@ app.use((err, req, res, next) => {
 });
 
 // error handler
-app.use((err, req, res) => {
+app.use((err, req, res, next) => {
   let status = err.status || 500;
   let message = err.message || "Internal Server Error";
 

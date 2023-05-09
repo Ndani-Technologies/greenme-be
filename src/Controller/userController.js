@@ -5,7 +5,10 @@ const env = require("../configs/dev");
 const { redisClient } = require("../middleware/redisClient");
 
 const loginCallback = async (req, res) => {
-  res.json({ user: req.user });
+  const message = { msg: "ssoComplete" };
+  const serializeMsg = JSON.stringify(req.user);
+  const script = `window.opener.postMessage(${serializeMsg}, '*');`;
+  res.send(`<script>${script}</script>`);
 };
 const getLoggedInUser = async (req, res, next) => {
   try {
@@ -240,4 +243,7 @@ module.exports = {
   userDelete,
   registerCallback,
   getLoggedInUser,
+  userTwoCompare,
+  userThreeCompare,
+  userFourCompare,
 };
