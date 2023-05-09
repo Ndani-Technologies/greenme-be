@@ -16,6 +16,7 @@
     "rules": {
         "no-console": "warn",
         "no-underscore-dangle": "off",
-        "consistent-return":"off"
+        "consistent-return":"off",
+        "no-unused-vars":"warn"
     }
 }

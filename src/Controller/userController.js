@@ -1,4 +1,5 @@
 const axios = require("axios");
+const mongoose = require("mongoose");
 const User = require("../Models/User");
 const env = require("../configs/dev");
 const { redisClient } = require("../middleware/redisClient");
@@ -10,17 +11,17 @@ const registerCallback = async (req, res) => {
   res.json({ user: req.user });
 };
 const getAllUsers = async (req, res, next) => {
+  const cacheKey = "USERS";
+  const cache = await redisClient.get(cacheKey);
+  if (cache) {
+    res.status(200).json({
+      success: true,
+      message: "users found",
+      data: JSON.parse(cache),
+    });
+    return;
+  }
   try {
-    const cacheKey = "USERS";
-    const cache = await redisClient.get(cacheKey);
-    if (cache) {
-      res.status(200).json({
-        success: true,
-        message: "Users found",
-        data: JSON.parse(cache),
-      });
-      return;
-    }
     User.find()
       .populate("role")
       .populate({
@@ -32,10 +33,19 @@ const getAllUsers = async (req, res, next) => {
       })
       .then(
         async (users) => {
+          if (users.length === 0) {
+            res.status(404).json({
+              success: false,
+              message: "users not found",
+            });
+            return;
+          }
           await redisClient.set(cacheKey, JSON.stringify(users));
-          res
-            .status(200)
-            .json({ success: true, message: "Users found", data: users });
+          res.status(200).json({
+            success: true,
+            message: "Users found",
+            data: users,
+          });
         },
         (err) => next(err)
       );
@@ -44,6 +54,9 @@ const getAllUsers = async (req, res, next) => {
   }
 };
 const getUserById = async (req, res, next) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    return res.status(400).json({ success: false, message: "Invalid id" });
+  }
   try {
     User.findById(req.params.id)
       .populate("role")
@@ -84,7 +97,16 @@ const createUser = async (req, res, next) => {
 };
 
 const userUpdate = async (req, res, next) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    return res.status(400).json({ success: false, message: "Invalid id" });
+  }
   const user = await User.findById(req.params.id);
+  if (user.email === "" || req.body.email === "") {
+    return res.status(500).json({
+      success: false,
+      message: "email is required attribute",
+    });
+  }
 
   if (!user) {
     return res.status(404).json({
@@ -121,12 +143,17 @@ const userUpdate = async (req, res, next) => {
   user
     .save()
     .then(() => {
-      res.status(200).json({ success: true, message: "User updated" });
+      res
+        .status(200)
+        .json({ success: true, message: "User updated", data: user });
     })
     .catch((err) => next(err));
 };
 
 const userDelete = async (req, res, next) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    return res.status(400).json({ success: false, message: "Invalid id" });
+  }
   const user = await User.findById(req.params.id);
   if (!user) {
     res.statusCode = 200;
@@ -144,7 +171,55 @@ const userDelete = async (req, res, next) => {
     )
     .catch((err) => next(err));
 };
-
+const userTwoCompare = async (req, res, next) => {
+  try {
+    const userId1 = req.params.id1;
+    const userId2 = req.params.id2;
+    const users = await User.find({ _id: { $in: [userId1, userId2] } });
+    res.status(200).json({
+      success: true,
+      message: "Comparison successful",
+      data: users,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+const userThreeCompare = async (req, res, next) => {
+  try {
+    const userId1 = req.params.id1;
+    const userId2 = req.params.id2;
+    const userId3 = req.params.id3;
+    const users = await User.find({
+      _id: { $in: [userId1, userId2, userId3] },
+    });
+    res.status(200).json({
+      success: true,
+      message: "Comparison successful",
+      data: users,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+const userFourCompare = async (req, res, next) => {
+  try {
+    const userId1 = req.params.id1;
+    const userId2 = req.params.id2;
+    const userId3 = req.params.id3;
+    const userId4 = req.params.id4;
+    const users = await User.find({
+      _id: { $in: [userId1, userId2, userId3, userId4] },
+    });
+    res.status(200).json({
+      success: true,
+      message: "Comparison successful",
+      data: users,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 module.exports = {
   loginCallback,
   getAllUsers,
@@ -153,4 +228,7 @@ module.exports = {
   userUpdate,
   userDelete,
   registerCallback,
+  userTwoCompare,
+  userThreeCompare,
+  userFourCompare,
 };

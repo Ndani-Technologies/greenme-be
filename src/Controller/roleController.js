@@ -4,7 +4,7 @@ const Role = require("../Models/Role");
 const getAllRoles = async (req, res, next) => {
   try {
     const cache = await redisClient.get("ROLE");
-    if (cache) {
+    if (cache != null) {
       res.status(200).json({
         success: true,
         message: "Role retrieved",

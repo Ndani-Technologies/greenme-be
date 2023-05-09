@@ -75,9 +75,9 @@ app.get("/api-docs.json", (req, res) => {
   res.setHeader("Content-Type", "application/json");
   res.send(swaggerSpec);
 });
-app.use("/user", UserRouter);
-app.use("/role", roleRouter);
-app.use("/permission", permissionRouter);
+app.use("/api/v1/user", UserRouter);
+app.use("/api/v1/role", roleRouter);
+app.use("/api/v1/permission", permissionRouter);
 
 app.use((req, res, next) => {
   const err = new Error();
@@ -86,11 +86,18 @@ app.use((req, res, next) => {
   next(err);
 });
 
+app.use((err, req, res, next) => {
+  res.status(err.status || 500).json({
+    success: false,
+    message: err.message || "internal server error",
+  });
+  next();
+});
+
 // error handler
 app.use((err, req, res) => {
   let status = err.status || 500;
   let message = err.message || "Internal Server Error";
-  console.log("error", err);
 
   if (err.name === "MongoServerError" && err.code === 11000) {
     status = 400;

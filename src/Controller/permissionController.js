@@ -4,7 +4,7 @@ const Permissions = require("../Models/Permission");
 const getAllPermissions = async (req, res, next) => {
   try {
     const cache = await redisClient.get("PERMISSION");
-    if (cache) {
+    if (cache != null) {
       res.status(200).json({
         success: true,
         message: "Permissions retrieved",
@@ -30,6 +30,13 @@ const getAllPermissions = async (req, res, next) => {
   }
 };
 const createPermission = (req, res, next) => {
+  if (req.body.title === "") {
+    res.status(500).json({
+      success: false,
+      message: "title must not be empty",
+    });
+    return;
+  }
   const newPermission = new Permissions({
     title: req.body.title,
     route: req.body.route,
@@ -49,6 +56,13 @@ const createPermission = (req, res, next) => {
 };
 
 const updatePermission = (req, res, next) => {
+  if (req.body.title === "") {
+    res.status(500).json({
+      success: false,
+      message: "title must not be empty",
+    });
+    return;
+  }
   Permissions.findByIdAndUpdate(
     req.params.id,
     { $set: req.body },
