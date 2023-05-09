@@ -15,6 +15,8 @@ UserRouter.post(
   userController.loginCallback
 );
 
+UserRouter.get("/getLoggedInUser", userController.getLoggedInUser);
+
 UserRouter.get("/login", passport.authenticate("login-saml"));
 
 UserRouter.get("/signup", passport.authenticate("register-saml"));
@@ -22,12 +24,16 @@ UserRouter.get("/signup", passport.authenticate("register-saml"));
 UserRouter.post(
   "/signup/callback",
   bodyParser.urlencoded({ extended: false }),
-  passport.authenticate("resgister-saml", {
+  passport.authenticate("register-saml", {
     failureRedirect: "/signup",
     failureMessage: "error",
   }),
   userController.registerCallback
 );
+
+UserRouter.get("/login", passport.authenticate("login-saml"));
+
+UserRouter.get("/signup", passport.authenticate("register-saml"));
 
 /**
  * @swagger
@@ -194,12 +200,24 @@ UserRouter.post(
 
 UserRouter.get("/", userController.getAllUsers);
 
-UserRouter.get("/user:id", userController.getUserById);
+UserRouter.get("/:id", userController.getUserById);
 
 UserRouter.post("/", userController.createUser);
 
 UserRouter.patch("/:id", userController.userUpdate);
 
 UserRouter.delete("/:id", userController.userDelete);
+
+UserRouter.get("/compare/id1/:id1/id2/:id2", userController.userTwoCompare);
+
+UserRouter.get(
+  "/compare/id1/:id1/id2/:id2/id3/:id3",
+  userController.userThreeCompare
+);
+
+UserRouter.get(
+  "/compare/id1/:id1/id2/:id2/id3/:id3/id4/:id4",
+  userController.userFourCompare
+);
 
 module.exports = UserRouter;

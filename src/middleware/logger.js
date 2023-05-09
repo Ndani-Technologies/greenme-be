@@ -4,7 +4,7 @@ const { combine, timestamp, label, prettyPrint } = format;
 
 const logger = createLogger({
   format: combine(
-    label({ label: "backend service 1" }),
+    label({ label: "user-management-service" }),
     timestamp(),
     prettyPrint()
   ),

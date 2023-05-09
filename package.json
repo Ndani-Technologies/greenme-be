@@ -1,5 +1,5 @@
 {
-  "name": "greenme-be-js-starter",
+  "name": "user-management-service",
   "version": "0.1.0",
   "description": "Backend service js starter pack",
   "main": "./src/server.js",
@@ -16,7 +16,7 @@
     "type": "git",
     "url": "git+https://github.com/Ndani-Technologies/greenme-be-js-starter.git"
   },
-  "author": "MM",
+  "author": "Ndanitech",
   "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/Ndani-Technologies/greenme-be-js-starter/issues"
