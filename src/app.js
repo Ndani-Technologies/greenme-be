@@ -76,7 +76,7 @@ app.get("/api-docs.json", (req, res) => {
   res.send(swaggerSpec);
 });
 app.use("/api/v1/user", UserRouter);
-// app.use("/user", UserRouter)
+
 app.use("/api/v1/role", roleRouter);
 app.use("/api/v1/permission", permissionRouter);
 

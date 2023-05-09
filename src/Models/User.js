@@ -11,7 +11,7 @@ const userSchema = new mongoose.Schema(
     username: {
       type: String,
     },
-    state: {
+    country: {
       type: String,
     },
     organization: {
@@ -24,6 +24,16 @@ const userSchema = new mongoose.Schema(
     lastName: {
       type: String,
     },
+    scope: [
+      {
+        type: String,
+      },
+    ],
+    otherCountries: [
+      {
+        type: String,
+      },
+    ],
     areaOfExpertise: [{ type: String }],
     profilePic: { type: String },
     uid: { type: Number },
@@ -31,9 +41,19 @@ const userSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Role",
     },
+    position: {
+      type: String,
+      require: true,
+    },
     timezone: {
       type: String,
       default: "GMT",
+    },
+    designation: {
+      type: String,
+    },
+    phone: {
+      type: Number,
     },
   },
   { timestamps: true }

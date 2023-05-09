@@ -1,10 +1,13 @@
 const axios = require("axios");
 const mongoose = require("mongoose");
+const session = require("express-session");
 const User = require("../Models/User");
 const env = require("../configs/dev");
 const { redisClient } = require("../middleware/redisClient");
 
 const loginCallback = async (req, res) => {
+  const userLogin = "";
+  session.userLogin = req.user;
   const message = { msg: "ssoComplete" };
   const serializeMsg = JSON.stringify(req.user);
   const script = `window.opener.postMessage(${serializeMsg}, '*');`;
@@ -12,9 +15,25 @@ const loginCallback = async (req, res) => {
 };
 const getLoggedInUser = async (req, res, next) => {
   try {
-    User.findById(req.user)
+    const userlogged = session.userLogin;
+    User.findById(userlogged.id)
+      .populate("role")
+      .populate({
+        path: "role",
+        populate: {
+          path: "permissions",
+          model: "Permissions",
+        },
+      })
       .then((user) => {
-        res.json({ user });
+        if (user.role === "user") {
+          res.json({
+            success: true,
+            status: 200,
+            message: " simple user found",
+          });
+        }
+        res.json({ data: user });
       })
       .catch((err) => next(err));
   } catch (err) {
@@ -27,7 +46,7 @@ const registerCallback = async (req, res) => {
 const getAllUsers = async (req, res, next) => {
   const cacheKey = "USERS";
   const cache = await redisClient.get(cacheKey);
-  if (cache) {
+  if (cache === "") {
     res.status(200).json({
       success: true,
       message: "users found",
@@ -170,9 +189,9 @@ const userDelete = async (req, res, next) => {
   }
   const user = await User.findById(req.params.id);
   if (!user) {
-    res.statusCode = 200;
+    res.statusCode = 404;
     res.setHeader("Content-Type", "application/json");
-    res.json({ success: true, message: "User Doesn't exist" });
+    res.json({ success: false, message: "User Doesn't exist" });
   }
   User.findByIdAndDelete(req.params.id)
     .then(
@@ -234,6 +253,166 @@ const userFourCompare = async (req, res, next) => {
     next(error);
   }
 };
+const createBenchmark = async (req, res, next) => {
+  try {
+    const loggedUserId = session.userLogin.id;
+    const benchmark = {
+      title: req.body.title,
+      country: req.body.country,
+      userId: loggedUserId,
+    };
+    const response = await axios.post("http://localhost:5001/benchmarking", {
+      title: benchmark.title,
+      country: benchmark.country,
+      userId: benchmark.userId,
+    });
+    if (response) {
+      res.json(response.data);
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+const createCategory = async (req, res, next) => {
+  try {
+    const { titleEng, titleAr, titleFr, titleSp, language } = req.body;
+    const cat = {
+      language: req.body.language,
+      titleEng: "",
+      titleFr: "",
+      titleSp: "",
+      titleAr: "",
+    };
+    if (cat.language) {
+      if (titleEng) {
+        cat.titleEng = titleEng;
+        cat.titleAr = "";
+        cat.titleFr = "";
+        cat.titleSp = "";
+      }
+      if (titleAr) {
+        cat.titleAr = titleAr;
+        cat.titleFr = "";
+        cat.titleSp = "";
+        cat.titleEng = "";
+      }
+      if (titleFr) {
+        cat.titleFr = titleFr;
+        cat.titleAr = "";
+        cat.titleSp = "";
+        cat.titleEng = "";
+      }
+      if (titleSp) {
+        cat.titleSp = titleSp;
+        cat.titleFr = "";
+        cat.titleAr = "";
+        cat.titleEng = "";
+      }
+      cat.language = language;
+    } else {
+      cat.titleEng = titleEng;
+      cat.language = "English";
+    }
+    const response = await axios.post("http://localhost:5001/category", {
+      language: cat.language,
+      titleEng: cat.titleEng,
+      titleAr: cat.titleAr,
+      titleFr: cat.titleFr,
+      titleSp: cat.titleSp,
+    });
+    if (response) {
+      res.json(response.data);
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+const createAnswerByUser = async (req, res, next) => {
+  const { answerOption, includeExplanation, language } = req.body;
+  try {
+    let answer;
+    if (language) {
+      answer = await axios.post("http://localhost:5001/answer", {
+        answerOption,
+        includeExplanation,
+        language,
+      });
+    } else {
+      answer = await axios.post("http://localhost:5001/answer", {
+        answerOption,
+        includeExplanation,
+      });
+    }
+    res.json(answer.data);
+  } catch (error) {
+    next(error);
+  }
+};
+const createAnswer = async (req, res, next) => {
+  const { answerOption, includeExplanation, language } = req.body;
+  try {
+    let answer;
+    if (language) {
+      answer = await axios.post("http://localhost:5001/answer", {
+        answerOption,
+        includeExplanation,
+        language,
+      });
+    } else {
+      answer = await axios.post("http://localhost:5001/answer", {
+        answerOption,
+        includeExplanation,
+      });
+    }
+    res.json(answer.data);
+  } catch (error) {
+    next(error);
+  }
+};
+const createQuestions = async (req, res, next) => {
+  const questionnaire = {
+    status: req.body.status,
+    visible: req.body.visible,
+    title: req.body.title,
+    description: req.body.description,
+    category: req.body.category,
+    answerOption: req.body.answerOption,
+  };
+  try {
+    const response = await axios.post("http://localhost:5001/questionnaire", {
+      status: questionnaire.status,
+      visible: questionnaire.visible,
+      title: questionnaire.title,
+      description: questionnaire.description,
+      category: questionnaire.category,
+      answerOption: questionnaire.answerOption,
+    });
+    res.json(response.data);
+  } catch (err) {
+    next(err);
+  }
+};
+const getAllBenchmarks = async (req, res, next) => {
+  try {
+    console.log("get all bench called");
+    const response = await axios.get("http://localhost:5001/benchmarking");
+    res.json(response.data);
+  } catch (error) {
+    next(error);
+  }
+};
+const getBenchmarkById = async (req, res, next) => {
+  try {
+    const benchmarkid = req.params.id;
+    const response = await axios.get(
+      `http://localhost:5001/benchmarking/${benchmarkid}`
+    );
+    res.json(response.data);
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   loginCallback,
   getAllUsers,
@@ -246,4 +425,11 @@ module.exports = {
   userTwoCompare,
   userThreeCompare,
   userFourCompare,
+  createBenchmark,
+  createAnswerByUser,
+  createCategory,
+  createAnswer,
+  createQuestions,
+  getAllBenchmarks,
+  getBenchmarkById,
 };

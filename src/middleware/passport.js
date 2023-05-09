@@ -32,11 +32,11 @@ if (fs.existsSync(idpCertificate)) {
     "login-saml",
     new SamlStrategy(
       {
-        path: "/user/login/callback",
+        path: "/api/v1/user/login/callback",
         entryPoint: loginUrl,
         issuer: "passport-saml",
         cert: fs.readFileSync(idpCertificate, "utf-8"),
-        callbackUrl: "http://localhost:5000/user/login/callback",
+        callbackUrl: "http://localhost:5000/api/v1/user/login/callback",
       },
       (profile, done) => {
         User.findOne({ email: profile.email }, (err, user) => {
@@ -77,11 +77,11 @@ if (fs.existsSync(idpCertificate)) {
     "register-saml",
     new SamlStrategy(
       {
-        path: "/register/callback",
+        path: "/api/v1/register/callback",
         entryPoint: registerUrl,
         issuer: "passport-saml",
         cert: fs.readFileSync(idpCertificate, "utf-8"),
-        callbackUrl: "http://localhost:5001/register/callback",
+        callbackUrl: "http://localhost:5000/api/v1/register/callback",
       },
       (profile, done) => {
         User.findOne({ email: profile.email }, (err, user) => {

@@ -47,6 +47,13 @@ const createRole = (req, res, next) => {
 };
 
 const updateRole = (req, res, next) => {
+  if (req.body.title === "") {
+    res.status(500).json({
+      success: false,
+      message: "title must not be empty",
+    });
+    return;
+  }
   Role.findByIdAndUpdate(req.params.id, { $set: req.body }, { new: true })
     .then(
       () => {

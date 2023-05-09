@@ -220,4 +220,18 @@ UserRouter.get(
   userController.userFourCompare
 );
 
+UserRouter.post("/createBench", userController.createBenchmark);
+
+UserRouter.post("/createAnswerByUser", userController.createAnswerByUser);
+
+UserRouter.post("/createCategory", userController.createCategory);
+
+UserRouter.post("/createAnswers", userController.createAnswer);
+
+UserRouter.post("/createQuestions", userController.createQuestions);
+
+UserRouter.get("/getAllBenchmarks", userController.getAllBenchmarks);
+
+UserRouter.get("/getBenchmarkById/:id", userController.getBenchmarkById);
+
 module.exports = UserRouter;
