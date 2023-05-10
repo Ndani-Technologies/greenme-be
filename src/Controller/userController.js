@@ -40,6 +40,17 @@ const getLoggedInUser = async (req, res, next) => {
     next(err);
   }
 };
+const logoutUser = async (req, res) => {
+  // Clear session data
+  req.session.destroy((err) => {
+    if (err) {
+      res.status(500).json({ error: "Failed to logout" });
+      return;
+    }
+    // Redirect to the login page or send a success response
+    res.json({ status: 200, message: "Logout successful" });
+  });
+};
 const registerCallback = async (req, res) => {
   res.json({ user: req.user });
 };
@@ -431,4 +442,5 @@ module.exports = {
   createQuestions,
   getAllBenchmarks,
   getBenchmarkById,
+  logoutUser,
 };

@@ -35,6 +35,8 @@ UserRouter.get("/login", passport.authenticate("login-saml"));
 
 UserRouter.get("/signup", passport.authenticate("register-saml"));
 
+UserRouter.post("/logout", userController.logoutUser);
+
 /**
  * @swagger
  * components:
