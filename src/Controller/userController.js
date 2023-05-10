@@ -41,13 +41,6 @@ const getLoggedInUser = async (req, res, next) => {
   }
 };
 const logoutUser = async (req, res) => {
-  // Clear session data
-  redisClient.flushall((err, result) => {
-    if (err) {
-      console.log("Error clearing Redis cache:", err);
-    }
-    console.log("Redis cache cleared successfully");
-  });
   req.session.destroy((err) => {
     if (err) {
       res.status(404).json({ error: "Failed to logout" });
@@ -83,13 +76,20 @@ const getAllUsers = async (req, res, next) => {
             });
             return;
           }
-          console.log(users.length, cache);
           if (users.length > cache.length) {
             await redisClient.set(cacheKey, JSON.stringify(users));
             res.status(200).json({
               success: true,
               message: "Users found",
               data: users,
+            });
+          }
+          if (users.length < cache.length) {
+            await redisClient.set(cacheKey, JSON.stringify(users));
+            res.status(200).json({
+              success: true,
+              message: "Users found",
+              data: JSON.parse(cache),
             });
           }
 
