@@ -31,7 +31,7 @@ const getAllPermissions = async (req, res, next) => {
 };
 const createPermission = (req, res, next) => {
   if (req.body.title === "") {
-    res.status(500).json({
+    res.status(404).json({
       success: false,
       message: "title must not be empty",
     });
@@ -57,7 +57,7 @@ const createPermission = (req, res, next) => {
 
 const updatePermission = (req, res, next) => {
   if (req.body.title === "") {
-    res.status(500).json({
+    res.status(404).json({
       success: false,
       message: "title must not be empty",
     });

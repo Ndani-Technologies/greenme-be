@@ -42,9 +42,15 @@ const getLoggedInUser = async (req, res, next) => {
 };
 const logoutUser = async (req, res) => {
   // Clear session data
+  redisClient.flushall((err, result) => {
+    if (err) {
+      console.log("Error clearing Redis cache:", err);
+    }
+    console.log("Redis cache cleared successfully");
+  });
   req.session.destroy((err) => {
     if (err) {
-      res.status(500).json({ error: "Failed to logout" });
+      res.status(404).json({ error: "Failed to logout" });
       return;
     }
     // Redirect to the login page or send a success response
@@ -57,14 +63,7 @@ const registerCallback = async (req, res) => {
 const getAllUsers = async (req, res, next) => {
   const cacheKey = "USERS";
   const cache = await redisClient.get(cacheKey);
-  if (cache === "") {
-    res.status(200).json({
-      success: true,
-      message: "users found",
-      data: JSON.parse(cache),
-    });
-    return;
-  }
+
   try {
     User.find()
       .populate("role")
@@ -77,19 +76,30 @@ const getAllUsers = async (req, res, next) => {
       })
       .then(
         async (users) => {
-          if (users.length === 0) {
+          if (users == null || cache == null) {
             res.status(404).json({
               success: false,
               message: "users not found",
             });
             return;
           }
-          await redisClient.set(cacheKey, JSON.stringify(users));
-          res.status(200).json({
-            success: true,
-            message: "Users found",
-            data: users,
-          });
+          console.log(users.length, cache);
+          if (users.length > cache.length) {
+            await redisClient.set(cacheKey, JSON.stringify(users));
+            res.status(200).json({
+              success: true,
+              message: "Users found",
+              data: users,
+            });
+          }
+
+          if (users.length === cache.length) {
+            res.status(200).json({
+              success: true,
+              message: "Users found",
+              data: JSON.parse(cache),
+            });
+          }
         },
         (err) => next(err)
       );
@@ -146,7 +156,7 @@ const userUpdate = async (req, res, next) => {
   }
   const user = await User.findById(req.params.id);
   if (user.email === "" || req.body.email === "") {
-    return res.status(500).json({
+    return res.status(404).json({
       success: false,
       message: "email is required attribute",
     });

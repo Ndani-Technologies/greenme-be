@@ -24,14 +24,20 @@ const userSchema = new mongoose.Schema(
     scope: [
       {
         type: String,
+        default: ["National Global Regional"],
       },
     ],
     otherCountries: [
       {
         type: String,
+        default: ["Pakistan", "Iran", "Canada"],
       },
     ],
-    areaOfExpertise: [{ type: String }],
+    areaOfExpertise: [
+      {
+        type: String,
+      },
+    ],
     profilePic: { type: String },
     uid: { type: Number },
     role: {
@@ -58,7 +64,6 @@ const userSchema = new mongoose.Schema(
     tags: {
       type: String,
       enum: ["Exiting", "Lead", "Long-term", "Partner"],
-      default: "English",
     },
   },
   { timestamps: true }
