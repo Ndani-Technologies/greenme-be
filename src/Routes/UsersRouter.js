@@ -224,6 +224,10 @@ UserRouter.get(
   "/compare/id1/:id1/id2/:id2/id3/:id3/id4/:id4",
   userController.userFourCompare
 );
+UserRouter.get(
+  "/organization/:organization",
+  userController.getUserByOrganization
+);
 
 UserRouter.post("/createBench", userController.createBenchmark);
 

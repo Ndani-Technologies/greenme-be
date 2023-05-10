@@ -40,6 +40,28 @@ const getLoggedInUser = async (req, res, next) => {
     next(err);
   }
 };
+const getUserByOrganization = async (req, res) => {
+  try {
+    const query = new RegExp(req.params.organization, "i");
+    const user = await User.find({
+      organization: { $regex: query },
+    });
+    if (user) {
+      res.status(200).json({
+        message: "user retrieved by organization",
+        success: true,
+        data: user,
+      });
+    } else {
+      res.status(404).json({
+        message: "user not found by organization",
+        success: false,
+      });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error });
+  }
+};
 const logoutUser = async (req, res) => {
   req.session.destroy((err) => {
     if (err) {
@@ -453,4 +475,5 @@ module.exports = {
   getAllBenchmarks,
   getBenchmarkById,
   logoutUser,
+  getUserByOrganization,
 };
