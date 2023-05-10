@@ -200,6 +200,9 @@ UserRouter.get("/signup", passport.authenticate("register-saml"));
 
 UserRouter.get("/", userController.getAllUsers);
 
+UserRouter.get("/getAllBenchmarks", userController.getAllBenchmarks);
+UserRouter.get("/getBenchmarkById/:id", userController.getBenchmarkById);
+
 UserRouter.get("/:id", userController.getUserById);
 
 UserRouter.post("/", userController.createUser);
@@ -229,9 +232,5 @@ UserRouter.post("/createCategory", userController.createCategory);
 UserRouter.post("/createAnswers", userController.createAnswer);
 
 UserRouter.post("/createQuestions", userController.createQuestions);
-
-UserRouter.get("/getAllBenchmarks", userController.getAllBenchmarks);
-
-UserRouter.get("/getBenchmarkById/:id", userController.getBenchmarkById);
 
 module.exports = UserRouter;

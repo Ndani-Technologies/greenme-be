@@ -394,7 +394,6 @@ const createQuestions = async (req, res, next) => {
 };
 const getAllBenchmarks = async (req, res, next) => {
   try {
-    console.log("get all bench called");
     const response = await axios.get("http://localhost:5001/benchmarking");
     res.json(response.data);
   } catch (error) {

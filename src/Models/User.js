@@ -8,9 +8,6 @@ const userSchema = new mongoose.Schema(
       unique: true,
       required: true,
     },
-    username: {
-      type: String,
-    },
     country: {
       type: String,
     },
@@ -49,11 +46,11 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "GMT",
     },
-    designation: {
-      type: String,
-    },
     phone: {
       type: Number,
+    },
+    state: {
+      type: String,
     },
   },
   { timestamps: true }
