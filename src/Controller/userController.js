@@ -56,7 +56,6 @@ const registerCallback = async (req, res) => {
 const getAllUsers = async (req, res, next) => {
   const cacheKey = "USERS";
   const cache = await redisClient.get(cacheKey);
-
   try {
     User.find()
       .populate("role")
@@ -69,14 +68,16 @@ const getAllUsers = async (req, res, next) => {
       })
       .then(
         async (users) => {
-          if (users == null || cache == null) {
+          const cacheObj = JSON.parse(cache);
+          const cacheLength = Object.keys(cacheObj).length;
+          if (users === "") {
             res.status(404).json({
               success: false,
               message: "users not found",
             });
             return;
           }
-          if (users.length > cache.length) {
+          if (users.length > cacheLength) {
             await redisClient.set(cacheKey, JSON.stringify(users));
             res.status(200).json({
               success: true,
@@ -84,8 +85,7 @@ const getAllUsers = async (req, res, next) => {
               data: users,
             });
           }
-          if (users.length < cache.length) {
-            await redisClient.set(cacheKey, JSON.stringify(users));
+          if (users.length < cacheLength) {
             res.status(200).json({
               success: true,
               message: "Users found",
@@ -93,7 +93,7 @@ const getAllUsers = async (req, res, next) => {
             });
           }
 
-          if (users.length === cache.length) {
+          if (users.length === cacheLength) {
             res.status(200).json({
               success: true,
               message: "Users found",

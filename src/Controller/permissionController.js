@@ -4,23 +4,41 @@ const Permissions = require("../Models/Permission");
 const getAllPermissions = async (req, res, next) => {
   try {
     const cache = await redisClient.get("PERMISSION");
-    if (cache != null) {
-      res.status(200).json({
-        success: true,
-        message: "Permissions retrieved",
-        data: JSON.parse(cache),
-      });
-      return;
-    }
+
     Permissions.find({})
       .then(
         (permisssions) => {
-          redisClient.set("PERMISSION", JSON.stringify(permisssions));
-          res.status(200).json({
-            success: true,
-            message: "Permissions retrieved",
-            data: permisssions,
-          });
+          const cacheObj = JSON.parse(cache);
+          const cacheLength = Object.keys(cacheObj).length;
+          if (permisssions === "") {
+            res.status(404).json({
+              success: false,
+              message: "permissions not found",
+            });
+            return;
+          }
+          if (permisssions.length > cacheLength) {
+            redisClient.set("PERMISSION", JSON.stringify(permisssions));
+            res.status(200).json({
+              success: true,
+              message: "permissions found",
+              data: permisssions,
+            });
+          }
+          if (permisssions.length < cacheLength) {
+            res.status(200).json({
+              success: true,
+              message: "permissions found",
+              data: JSON.parse(cache),
+            });
+          }
+          if (permisssions.length === cacheLength) {
+            res.status(200).json({
+              success: true,
+              message: "permissions found",
+              data: JSON.parse(cache),
+            });
+          }
         },
         (err) => next(err)
       )
