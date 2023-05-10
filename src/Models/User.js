@@ -52,6 +52,14 @@ const userSchema = new mongoose.Schema(
     state: {
       type: String,
     },
+    leadScore: {
+      type: Number,
+    },
+    tags: {
+      type: String,
+      enum: ["Exiting", "Lead", "Long-term", "Partner"],
+      default: "English",
+    },
   },
   { timestamps: true }
 );
