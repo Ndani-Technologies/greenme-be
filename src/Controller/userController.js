@@ -78,6 +78,15 @@ const registerCallback = async (req, res) => {
 const getAllUsers = async (req, res, next) => {
   const cacheKey = "USERS";
   const cache = await redisClient.get(cacheKey);
+  let cacheObj = "";
+  let cacheLength = 0;
+  if (cache != null) {
+    cacheObj = JSON.parse(cache);
+    cacheLength = Object.keys(cacheObj).length;
+  } else {
+    cacheLength = 0;
+    cacheObj = "";
+  }
   try {
     User.find()
       .populate("role")
@@ -90,8 +99,6 @@ const getAllUsers = async (req, res, next) => {
       })
       .then(
         async (users) => {
-          const cacheObj = JSON.parse(cache);
-          const cacheLength = Object.keys(cacheObj).length;
           if (users === "") {
             res.status(404).json({
               success: false,
@@ -108,19 +115,31 @@ const getAllUsers = async (req, res, next) => {
             });
           }
           if (users.length < cacheLength) {
+            await redisClient.del(cacheKey);
+            await redisClient.set(cacheKey, JSON.stringify(users));
             res.status(200).json({
               success: true,
               message: "Users found",
-              data: JSON.parse(cache),
+              data: users,
             });
           }
 
           if (users.length === cacheLength) {
-            res.status(200).json({
-              success: true,
-              message: "Users found",
-              data: JSON.parse(cache),
-            });
+            if (users.email === cache.email) {
+              res.status(200).json({
+                success: true,
+                message: "Users found",
+                data: JSON.parse(cache),
+              });
+            } else {
+              await redisClient.del(cacheKey);
+              await redisClient.set(cacheKey, JSON.stringify(users));
+              res.status(200).json({
+                success: true,
+                message: "User found",
+                data: users,
+              });
+            }
           }
         },
         (err) => next(err)

@@ -3,13 +3,20 @@ const Permissions = require("../Models/Permission");
 
 const getAllPermissions = async (req, res, next) => {
   try {
-    const cache = await redisClient.get("PERMISSION");
-
+    const cacheKey = "PERMISSION";
+    const cache = await redisClient.get(cacheKey);
+    let cacheObj = "";
+    let cacheLength = 0;
+    if (cache != null) {
+      cacheObj = JSON.parse(cache);
+      cacheLength = Object.keys(cacheObj).length;
+    } else {
+      cacheLength = 0;
+      cacheObj = "";
+    }
     Permissions.find({})
       .then(
         (permisssions) => {
-          const cacheObj = JSON.parse(cache);
-          const cacheLength = Object.keys(cacheObj).length;
           if (permisssions === "") {
             res.status(404).json({
               success: false,
@@ -26,6 +33,8 @@ const getAllPermissions = async (req, res, next) => {
             });
           }
           if (permisssions.length < cacheLength) {
+            redisClient.del(cacheKey);
+            redisClient.set(cacheKey, JSON.stringify(permisssions));
             res.status(200).json({
               success: true,
               message: "permissions found",
@@ -33,11 +42,21 @@ const getAllPermissions = async (req, res, next) => {
             });
           }
           if (permisssions.length === cacheLength) {
-            res.status(200).json({
-              success: true,
-              message: "permissions found",
-              data: JSON.parse(cache),
-            });
+            if (permisssions.title === cache.title) {
+              res.status(200).json({
+                success: true,
+                message: "Permissions found",
+                data: JSON.parse(cache),
+              });
+            } else {
+              redisClient.del(cacheKey);
+              redisClient.set(cacheKey, JSON.stringify(permisssions));
+              res.status(200).json({
+                success: true,
+                message: "permissions found",
+                data: permisssions,
+              });
+            }
           }
         },
         (err) => next(err)

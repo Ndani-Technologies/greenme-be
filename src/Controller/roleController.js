@@ -3,14 +3,21 @@ const Role = require("../Models/Role");
 
 const getAllRoles = async (req, res, next) => {
   try {
-    const cache = await redisClient.get("ROLE");
-
+    const cacheKey = "ROLE";
+    const cache = await redisClient.get(cacheKey);
+    let cacheObj = "";
+    let cacheLength = 0;
+    if (cache != null) {
+      cacheObj = JSON.parse(cache);
+      cacheLength = Object.keys(cacheObj).length;
+    } else {
+      cacheLength = 0;
+      cacheObj = "";
+    }
     Role.find({})
       .populate("permissions")
       .then(
         (roles) => {
-          const cacheObj = JSON.parse(cache);
-          const cacheLength = Object.keys(cacheObj).length;
           if (roles === "") {
             res.status(404).json({
               success: false,
@@ -27,6 +34,8 @@ const getAllRoles = async (req, res, next) => {
             });
           }
           if (roles.length < cacheLength) {
+            redisClient.del(cacheKey);
+            redisClient.set(cacheKey, JSON.stringify(roles));
             res.status(200).json({
               success: true,
               message: "roles found",
@@ -34,11 +43,21 @@ const getAllRoles = async (req, res, next) => {
             });
           }
           if (roles.length === cacheLength) {
-            res.status(200).json({
-              success: true,
-              message: "roles found",
-              data: JSON.parse(cache),
-            });
+            if (roles.title === cache.title) {
+              res.status(200).json({
+                success: true,
+                message: "Roles found",
+                data: JSON.parse(cache),
+              });
+            } else {
+              redisClient.del(cacheKey);
+              redisClient.set(cacheKey, JSON.stringify(roles));
+              res.status(200).json({
+                success: true,
+                message: "Roles found",
+                data: roles,
+              });
+            }
           }
         },
         (err) => next(err)
