@@ -36,7 +36,6 @@ UserRouter.get("/login", passport.authenticate("login-saml"));
 UserRouter.get("/signup", passport.authenticate("register-saml"));
 
 UserRouter.post("/logout", userController.logoutUser);
-
 /**
  * @swagger
  * components:
@@ -192,7 +191,7 @@ UserRouter.post("/logout", userController.logoutUser);
  *         required: true
  *         type: string
  *     responses:
- *       204:
+ *       200:
  *         description: User deleted successfully
  *       404:
  *         description: User not found

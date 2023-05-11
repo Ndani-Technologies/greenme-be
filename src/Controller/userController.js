@@ -157,6 +157,12 @@ const getUserById = async (req, res, next) => {
 };
 
 const createUser = async (req, res, next) => {
+  const { email } = req.body;
+  const isUserExist = await User.find({ email });
+  if (isUserExist && isUserExist.length > 0) {
+    res.status(404).json({ success: false, message: "User Already Exist" });
+    return;
+  }
   const user = new User(req.body);
   User.create(user)
     .then(
@@ -165,9 +171,14 @@ const createUser = async (req, res, next) => {
           .status(201)
           .json({ success: true, message: "User created", data: newUser });
       },
-      (err) => next(err)
+      (err) => {
+        console.log("errr2", err);
+
+        next(err);
+      }
     )
     .catch((err) => {
+      console.log("errr", err);
       next(err);
     });
 };
