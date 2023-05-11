@@ -123,23 +123,23 @@ const getAllUsers = async (req, res, next) => {
               data: users,
             });
           }
-
+          let emailCheck = false;
           if (users.length === cacheLength) {
-            if (users.email === cache.email) {
-              res.status(200).json({
-                success: true,
-                message: "Users found",
-                data: JSON.parse(cache),
+            users.forEach((elementUser) => {
+              cacheObj.forEach((elementCache) => {
+                // eslint-disable-next-line eqeqeq
+                if (elementUser.email != elementCache.email) {
+                  emailCheck = false;
+                }
               });
-            } else {
-              await redisClient.del(cacheKey);
-              await redisClient.set(cacheKey, JSON.stringify(users));
-              res.status(200).json({
-                success: true,
-                message: "User found",
-                data: users,
-              });
-            }
+              if (emailCheck === false) {
+                res.status(200).json({
+                  success: true,
+                  message: "Users found",
+                  data: users,
+                });
+              }
+            });
           }
         },
         (err) => next(err)
