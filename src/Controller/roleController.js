@@ -1,9 +1,10 @@
 const { redisClient } = require("../middleware/redisClient");
 const Role = require("../Models/Role");
 
+const cacheKey = "ROLE";
+
 const getAllRoles = async (req, res, next) => {
   try {
-    const cacheKey = "ROLE";
     const cache = await redisClient.get(cacheKey);
     let cacheObj = "";
     let cacheLength = 0;
@@ -26,7 +27,7 @@ const getAllRoles = async (req, res, next) => {
             return;
           }
           if (roles.length > cacheLength) {
-            redisClient.set("ROLE", JSON.stringify(roles));
+            redisClient.set(cacheKey, JSON.stringify(roles));
             res.status(200).json({
               success: true,
               message: "roles found",
@@ -42,20 +43,37 @@ const getAllRoles = async (req, res, next) => {
               data: JSON.parse(cache),
             });
           }
+          let roleTitleCheck = true;
           if (roles.length === cacheLength) {
-            if (roles.title === cache.title) {
-              res.status(200).json({
-                success: true,
-                message: "Roles found",
-                data: JSON.parse(cache),
-              });
-            } else {
+            // eslint-disable-next-line no-restricted-syntax, guard-for-in
+            for (const _id in roles) {
+              // eslint-disable-next-line no-prototype-builtins
+              if (roles.hasOwnProperty(_id)) {
+                // Check if the user exists in cache object
+                // eslint-disable-next-line no-prototype-builtins
+                if (cacheObj.hasOwnProperty(_id)) {
+                  const roleTitle = roles[_id].title;
+                  const cacheTitle = cacheObj[_id].title;
+                  // Compare the email values
+                  if (roleTitle !== cacheTitle) {
+                    roleTitleCheck = false;
+                  }
+                }
+              }
+            }
+            if (roleTitleCheck === false) {
               redisClient.del(cacheKey);
               redisClient.set(cacheKey, JSON.stringify(roles));
               res.status(200).json({
                 success: true,
-                message: "Roles found",
+                message: "Users found",
                 data: roles,
+              });
+            } else {
+              res.status(200).json({
+                success: true,
+                message: "Users found",
+                data: JSON.parse(cache),
               });
             }
           }
@@ -96,6 +114,9 @@ const updateRole = (req, res, next) => {
   Role.findByIdAndUpdate(req.params.id, { $set: req.body }, { new: true })
     .then(
       () => {
+        redisClient.del(cacheKey);
+        const allRoles = Role.find({}).populate("permissions");
+        redisClient.set(cacheKey, JSON.stringify(allRoles));
         res.statusCode = 200;
         res.setHeader("Content-Type", "application/json");
         res.json({ success: true, message: "role updated" });
@@ -115,6 +136,9 @@ const deleteRole = async (req, res, next) => {
   Role.findByIdAndDelete(req.params.id)
     .then(
       () => {
+        redisClient.del(cacheKey);
+        const allRoles = Role.find({}).populate("permissions");
+        redisClient.set(cacheKey, JSON.stringify(allRoles));
         res.statusCode = 200;
         res.setHeader("Content-Type", "application/json");
         res.json({ success: true, message: "role deleted" });

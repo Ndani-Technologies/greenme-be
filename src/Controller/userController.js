@@ -5,6 +5,8 @@ const User = require("../Models/User");
 const env = require("../configs/dev");
 const { redisClient } = require("../middleware/redisClient");
 
+const cacheKey = "USERS";
+
 const loginCallback = async (req, res) => {
   const userLogin = "";
   session.userLogin = req.user;
@@ -76,7 +78,6 @@ const registerCallback = async (req, res) => {
   res.json({ user: req.user });
 };
 const getAllUsers = async (req, res, next) => {
-  const cacheKey = "USERS";
   const cache = await redisClient.get(cacheKey);
   let cacheObj = "";
   let cacheLength = 0;
@@ -97,24 +98,50 @@ const getAllUsers = async (req, res, next) => {
           model: "Permissions",
         },
       })
-      .then(
-        async (users) => {
-          if (users === "") {
-            res.status(404).json({
-              success: false,
-              message: "users not found",
-            });
-            return;
+      .then(async (users) => {
+        if (users === "") {
+          res.status(404).json({
+            success: false,
+            message: "users not found",
+          });
+          return;
+        }
+        if (users.length > cacheLength) {
+          await redisClient.set(cacheKey, JSON.stringify(users));
+          res.status(200).json({
+            success: true,
+            message: "Users found",
+            data: users,
+          });
+        }
+        if (users.length < cacheLength) {
+          await redisClient.del(cacheKey);
+          await redisClient.set(cacheKey, JSON.stringify(users));
+          res.status(200).json({
+            success: true,
+            message: "Users found",
+            data: users,
+          });
+        }
+        let emailCheck = true;
+        if (users.length === cacheLength) {
+          // eslint-disable-next-line no-restricted-syntax, guard-for-in
+          for (const _id in users) {
+            // eslint-disable-next-line no-prototype-builtins
+            if (users.hasOwnProperty(_id)) {
+              // Check if the user exists in cache object
+              // eslint-disable-next-line no-prototype-builtins
+              if (cacheObj.hasOwnProperty(_id)) {
+                const userEmail = users[_id].email;
+                const cacheEmail = cacheObj[_id].email;
+                // Compare the email values
+                if (userEmail !== cacheEmail) {
+                  emailCheck = false;
+                }
+              }
+            }
           }
-          if (users.length > cacheLength) {
-            await redisClient.set(cacheKey, JSON.stringify(users));
-            res.status(200).json({
-              success: true,
-              message: "Users found",
-              data: users,
-            });
-          }
-          if (users.length < cacheLength) {
+          if (emailCheck === false) {
             await redisClient.del(cacheKey);
             await redisClient.set(cacheKey, JSON.stringify(users));
             res.status(200).json({
@@ -122,28 +149,15 @@ const getAllUsers = async (req, res, next) => {
               message: "Users found",
               data: users,
             });
-          }
-          let emailCheck = false;
-          if (users.length === cacheLength) {
-            users.forEach((elementUser) => {
-              cacheObj.forEach((elementCache) => {
-                // eslint-disable-next-line eqeqeq
-                if (elementUser.email != elementCache.email) {
-                  emailCheck = false;
-                }
-              });
-              if (emailCheck === false) {
-                res.status(200).json({
-                  success: true,
-                  message: "Users found",
-                  data: users,
-                });
-              }
+          } else {
+            res.status(200).json({
+              success: true,
+              message: "Users found",
+              data: JSON.parse(cache),
             });
           }
-        },
-        (err) => next(err)
-      );
+        }
+      });
   } catch (err) {
     next(err);
   }
@@ -187,7 +201,7 @@ const createUser = async (req, res, next) => {
     .then(
       (newUser) => {
         res
-          .status(201)
+          .status(200)
           .json({ success: true, message: "User created", data: newUser });
       },
       (err) => {
@@ -249,9 +263,18 @@ const userUpdate = async (req, res, next) => {
   user
     .save()
     .then(() => {
-      res
-        .status(200)
-        .json({ success: true, message: "User updated", data: user });
+      redisClient.del(cacheKey);
+      const allUsers = User.find()
+        .populate("role")
+        .populate({
+          path: "role",
+          populate: {
+            path: "permissions",
+            model: "Permissions",
+          },
+        });
+      redisClient.set(cacheKey, JSON.stringify(allUsers));
+      res.status(200).json({ success: true, message: "User updated" });
     })
     .catch((err) => next(err));
 };
@@ -269,6 +292,17 @@ const userDelete = async (req, res, next) => {
   User.findByIdAndDelete(req.params.id)
     .then(
       () => {
+        redisClient.del(cacheKey);
+        const allUsers = User.find()
+          .populate("role")
+          .populate({
+            path: "role",
+            populate: {
+              path: "permissions",
+              model: "Permissions",
+            },
+          });
+        redisClient.set(cacheKey, JSON.stringify(allUsers));
         res.statusCode = 200;
         res.setHeader("Content-Type", "application/json");
         res.json({ success: true, message: "User Deleted" });

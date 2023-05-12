@@ -1,9 +1,10 @@
 const { redisClient } = require("../middleware/redisClient");
 const Permissions = require("../Models/Permission");
 
+const cacheKey = "PERMISSION";
+
 const getAllPermissions = async (req, res, next) => {
   try {
-    const cacheKey = "PERMISSION";
     const cache = await redisClient.get(cacheKey);
     let cacheObj = "";
     let cacheLength = 0;
@@ -41,20 +42,37 @@ const getAllPermissions = async (req, res, next) => {
               data: JSON.parse(cache),
             });
           }
+          let permissionTitleCheck = true;
           if (permisssions.length === cacheLength) {
-            if (permisssions.title === cache.title) {
-              res.status(200).json({
-                success: true,
-                message: "Permissions found",
-                data: JSON.parse(cache),
-              });
-            } else {
+            // eslint-disable-next-line no-restricted-syntax, guard-for-in
+            for (const _id in permisssions) {
+              // eslint-disable-next-line no-prototype-builtins
+              if (permisssions.hasOwnProperty(_id)) {
+                // Check if the user exists in cache object
+                // eslint-disable-next-line no-prototype-builtins
+                if (cacheObj.hasOwnProperty(_id)) {
+                  const permissionTitle = permisssions[_id].title;
+                  const cacheTitle = cacheObj[_id].title;
+                  // Compare the email values
+                  if (permissionTitle !== cacheTitle) {
+                    permissionTitleCheck = false;
+                  }
+                }
+              }
+            }
+            if (permissionTitleCheck === false) {
               redisClient.del(cacheKey);
               redisClient.set(cacheKey, JSON.stringify(permisssions));
               res.status(200).json({
                 success: true,
-                message: "permissions found",
+                message: "Users found",
                 data: permisssions,
+              });
+            } else {
+              res.status(200).json({
+                success: true,
+                message: "Users found",
+                data: JSON.parse(cache),
               });
             }
           }
@@ -107,6 +125,9 @@ const updatePermission = (req, res, next) => {
   )
     .then(
       () => {
+        redisClient.del(cacheKey);
+        const allPermissions = Permissions.find({});
+        redisClient.set(cacheKey, JSON.stringify(allPermissions));
         res.statusCode = 200;
         res.setHeader("Content-Type", "application/json");
         res.json({ success: true, message: "Permission updated" });
@@ -125,6 +146,9 @@ const deletePermission = async (req, res, next) => {
   Permissions.findByIdAndDelete(req.params.id)
     .then(
       () => {
+        redisClient.del(cacheKey);
+        const allPermissions = Permissions.find({});
+        redisClient.set(cacheKey, JSON.stringify(allPermissions));
         res.statusCode = 200;
         res.setHeader("Content-Type", "application/json");
         res.json({ success: true, message: "Permission deleted" });
