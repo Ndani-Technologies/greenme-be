@@ -78,7 +78,7 @@ const registerCallback = async (req, res) => {
   res.json({ user: req.user });
 };
 const getAllUsers = async (req, res, next) => {
-  const cache = await redisClient.get(cacheKey);
+  let cache = await redisClient.get(cacheKey);
   let cacheObj = "";
   let cacheLength = 0;
   if (cache != null) {
@@ -114,48 +114,15 @@ const getAllUsers = async (req, res, next) => {
             data: users,
           });
         }
-        if (users.length < cacheLength) {
+        if (users.length <= cacheLength) {
           await redisClient.del(cacheKey);
           await redisClient.set(cacheKey, JSON.stringify(users));
+          cache = await redisClient.get(cacheKey);
           res.status(200).json({
             success: true,
             message: "Users found",
             data: users,
           });
-        }
-        let emailCheck = true;
-        if (users.length === cacheLength) {
-          // eslint-disable-next-line no-restricted-syntax, guard-for-in
-          for (const _id in users) {
-            // eslint-disable-next-line no-prototype-builtins
-            if (users.hasOwnProperty(_id)) {
-              // Check if the user exists in cache object
-              // eslint-disable-next-line no-prototype-builtins
-              if (cacheObj.hasOwnProperty(_id)) {
-                const userEmail = users[_id].email;
-                const cacheEmail = cacheObj[_id].email;
-                // Compare the email values
-                if (userEmail !== cacheEmail) {
-                  emailCheck = false;
-                }
-              }
-            }
-          }
-          if (emailCheck === false) {
-            await redisClient.del(cacheKey);
-            await redisClient.set(cacheKey, JSON.stringify(users));
-            res.status(200).json({
-              success: true,
-              message: "Users found",
-              data: users,
-            });
-          } else {
-            res.status(200).json({
-              success: true,
-              message: "Users found",
-              data: JSON.parse(cache),
-            });
-          }
         }
       });
   } catch (err) {

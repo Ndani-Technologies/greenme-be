@@ -5,7 +5,7 @@ const cacheKey = "ROLE";
 
 const getAllRoles = async (req, res, next) => {
   try {
-    const cache = await redisClient.get(cacheKey);
+    let cache = await redisClient.get(cacheKey);
     let cacheObj = "";
     let cacheLength = 0;
     if (cache != null) {
@@ -34,48 +34,15 @@ const getAllRoles = async (req, res, next) => {
               data: roles,
             });
           }
-          if (roles.length < cacheLength) {
+          if (roles.length <= cacheLength) {
             redisClient.del(cacheKey);
             redisClient.set(cacheKey, JSON.stringify(roles));
+            cache = redisClient.get(cacheKey);
             res.status(200).json({
               success: true,
               message: "roles found",
               data: JSON.parse(cache),
             });
-          }
-          let roleTitleCheck = true;
-          if (roles.length === cacheLength) {
-            // eslint-disable-next-line no-restricted-syntax, guard-for-in
-            for (const _id in roles) {
-              // eslint-disable-next-line no-prototype-builtins
-              if (roles.hasOwnProperty(_id)) {
-                // Check if the user exists in cache object
-                // eslint-disable-next-line no-prototype-builtins
-                if (cacheObj.hasOwnProperty(_id)) {
-                  const roleTitle = roles[_id].title;
-                  const cacheTitle = cacheObj[_id].title;
-                  // Compare the email values
-                  if (roleTitle !== cacheTitle) {
-                    roleTitleCheck = false;
-                  }
-                }
-              }
-            }
-            if (roleTitleCheck === false) {
-              redisClient.del(cacheKey);
-              redisClient.set(cacheKey, JSON.stringify(roles));
-              res.status(200).json({
-                success: true,
-                message: "Roles found",
-                data: roles,
-              });
-            } else {
-              res.status(200).json({
-                success: true,
-                message: "Roles found",
-                data: JSON.parse(cache),
-              });
-            }
           }
         },
         (err) => next(err)

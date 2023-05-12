@@ -5,7 +5,7 @@ const cacheKey = "PERMISSION";
 
 const getAllPermissions = async (req, res, next) => {
   try {
-    const cache = await redisClient.get(cacheKey);
+    let cache = await redisClient.get(cacheKey);
     let cacheObj = "";
     let cacheLength = 0;
     if (cache != null) {
@@ -33,48 +33,15 @@ const getAllPermissions = async (req, res, next) => {
               data: permisssions,
             });
           }
-          if (permisssions.length < cacheLength) {
+          if (permisssions.length <= cacheLength) {
             redisClient.del(cacheKey);
             redisClient.set(cacheKey, JSON.stringify(permisssions));
+            cache = redisClient.get(cacheKey);
             res.status(200).json({
               success: true,
               message: "permissions found",
               data: JSON.parse(cache),
             });
-          }
-          let permissionTitleCheck = true;
-          if (permisssions.length === cacheLength) {
-            // eslint-disable-next-line no-restricted-syntax, guard-for-in
-            for (const _id in permisssions) {
-              // eslint-disable-next-line no-prototype-builtins
-              if (permisssions.hasOwnProperty(_id)) {
-                // Check if the user exists in cache object
-                // eslint-disable-next-line no-prototype-builtins
-                if (cacheObj.hasOwnProperty(_id)) {
-                  const permissionTitle = permisssions[_id].title;
-                  const cacheTitle = cacheObj[_id].title;
-                  // Compare the email values
-                  if (permissionTitle !== cacheTitle) {
-                    permissionTitleCheck = false;
-                  }
-                }
-              }
-            }
-            if (permissionTitleCheck === false) {
-              redisClient.del(cacheKey);
-              redisClient.set(cacheKey, JSON.stringify(permisssions));
-              res.status(200).json({
-                success: true,
-                message: "Permissions found",
-                data: permisssions,
-              });
-            } else {
-              res.status(200).json({
-                success: true,
-                message: "Permissions found",
-                data: JSON.parse(cache),
-              });
-            }
           }
         },
         (err) => next(err)
