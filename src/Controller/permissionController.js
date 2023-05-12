@@ -65,13 +65,13 @@ const getAllPermissions = async (req, res, next) => {
               redisClient.set(cacheKey, JSON.stringify(permisssions));
               res.status(200).json({
                 success: true,
-                message: "Users found",
+                message: "Permissions found",
                 data: permisssions,
               });
             } else {
               res.status(200).json({
                 success: true,
-                message: "Users found",
+                message: "Permissions found",
                 data: JSON.parse(cache),
               });
             }

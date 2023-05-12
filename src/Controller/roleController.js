@@ -66,13 +66,13 @@ const getAllRoles = async (req, res, next) => {
               redisClient.set(cacheKey, JSON.stringify(roles));
               res.status(200).json({
                 success: true,
-                message: "Users found",
+                message: "Roles found",
                 data: roles,
               });
             } else {
               res.status(200).json({
                 success: true,
-                message: "Users found",
+                message: "Roles found",
                 data: JSON.parse(cache),
               });
             }
