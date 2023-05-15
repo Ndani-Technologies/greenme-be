@@ -4,6 +4,7 @@ const dev = require("../configs/dev");
 let redisClient;
 const connectClient = async () => {
   redisClient = redis.createClient(dev.redisUrl);
+
   await redisClient.connect();
 };
 

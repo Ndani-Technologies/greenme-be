@@ -2,6 +2,8 @@ const express = require("express");
 const path = require("path");
 require("dotenv/config");
 
+const healthcheck = require("./routes/healthcheck");
+
 const app = express();
 const cors = require("cors");
 
@@ -117,8 +119,6 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.get("/healthcheck", (req, res) => {
-  res.status(200).send("App is running!");
-});
+app.use(healthcheck);
 
 module.exports = app;
