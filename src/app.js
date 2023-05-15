@@ -80,6 +80,7 @@ app.use("/api/v1/user", UserRouter);
 
 app.use("/api/v1/role", roleRouter);
 app.use("/api/v1/permission", permissionRouter);
+app.use("/api/v1/", healthcheck);
 
 app.use((req, res, next) => {
   const err = new Error();
@@ -117,7 +118,5 @@ app.use((err, req, res, next) => {
     },
   });
 });
-
-app.use(healthcheck);
 
 module.exports = app;
