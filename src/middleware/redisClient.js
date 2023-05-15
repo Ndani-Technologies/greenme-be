@@ -1,8 +1,9 @@
 const redis = require("redis");
+const dev = require("../configs/dev");
 
 let redisClient;
 const connectClient = async () => {
-  redisClient = redis.createClient();
+  redisClient = redis.createClient(dev.redisPort, { URL: dev.redisUrl });
   await redisClient.connect();
 };
 

@@ -8,6 +8,8 @@ const devEnv = {
   loginUrl: process.env.LOGIN_URL,
   registerUrl: process.env.REGISTER_URL,
   idpCertificate: process.env.IDP_CERTIFICATE,
+  redisPort: process.env.REDIS_PORT,
+  redisUrl: process.env.REDIS_URL,
 };
 
 module.exports = devEnv;
