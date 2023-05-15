@@ -12,6 +12,7 @@ const swaggerUi = require("swagger-ui-express");
 const swaggerJSDoc = require("swagger-jsdoc");
 
 const mongoose = require("mongoose");
+const healthcheck = require("./Routes/healthcheck");
 const passport = require("./middleware/passport");
 const UserRouter = require("./Routes/UsersRouter");
 const env = require("./configs/dev");
@@ -117,8 +118,6 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.get("/healthcheck", (req, res) => {
-  res.status(200).send("App is running!");
-});
+app.use(healthcheck);
 
 module.exports = app;
