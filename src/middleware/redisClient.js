@@ -2,7 +2,7 @@ const redis = require("redis");
 
 let redisClient;
 const connectClient = async () => {
-  redisClient = redis.createClient();
+  redisClient = redis.createClient(process.env.REDIS_URL);
   await redisClient.connect();
 };
 
