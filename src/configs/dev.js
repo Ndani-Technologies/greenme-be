@@ -7,9 +7,11 @@ const devEnv = {
   timezoneKey: process.env.TIMEZONE_KEY,
   loginUrl: process.env.LOGIN_URL,
   registerUrl: process.env.REGISTER_URL,
-  idpCertificate: process.env.IDP_CERTIFICATE,
   redisPort: process.env.REDIS_PORT,
   redisUrl: process.env.REDIS_URL,
+  IDP_Cert: process.env.IDP_CRT,
+  Login_Callback: process.env.LOGIN_CALLBACK,
+  Register_Callback: process.env.REGISTER_CALLBACK,
 };
 
 module.exports = devEnv;
