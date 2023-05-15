@@ -9,9 +9,18 @@ const cacheKey = "USERS";
 
 const loginCallback = async (req, res) => {
   const userLogin = "";
-  session.userLogin = req.user;
+  const user = await User.findById(req.user._id)
+    .populate("role")
+    .populate({
+      path: "role",
+      populate: {
+        path: "permissions",
+        model: "Permissions",
+      },
+    });
+  session.userLogin = user;
   const message = { msg: "ssoComplete" };
-  const serializeMsg = JSON.stringify(req.user);
+  const serializeMsg = JSON.stringify(user);
   const script = `window.opener.postMessage(${serializeMsg}, '*');`;
   res.send(`<script>${script}</script>`);
 };
@@ -64,15 +73,31 @@ const getUserByOrganization = async (req, res) => {
     res.status(500).json({ message: error });
   }
 };
-const logoutUser = async (req, res) => {
-  req.session.destroy((err) => {
+const logoutUser = async (req, res, next) => {
+  req.logout((err) => {
     if (err) {
-      res.status(404).json({ error: "Failed to logout" });
-      return;
+      return next(err);
     }
-    // Redirect to the login page or send a success response
-    res.json({ status: 200, message: "Logout successful" });
+    req.session.destroy((error) => {
+      if (err) {
+        res.status(404).json({ error: "Failed to logout" });
+        return;
+      }
+      // Redirect to the login page or send a success response
+      res.json({ status: 200, message: "Logout successful" });
+    });
+    // res.redirect("/");
   });
+  // req.logout();
+  // req.session.destroy((err) => {
+  //   if (err) {
+  //     res.status(404).json({ error: "Failed to logout" });
+  //     return;
+  //   }
+  //   // Redirect to the login page or send a success response
+  //   res.json({ status: 200, message: "Logout successful" });
+  // }
+  // );
 };
 const registerCallback = async (req, res) => {
   res.json({ user: req.user });

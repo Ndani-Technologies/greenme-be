@@ -42,12 +42,17 @@ const getAllRoles = async (req, res, next) => {
               success: true,
               message: "roles found",
               data: JSON.parse(cache),
+              // data: roles,
             });
           }
         },
         (err) => next(err)
       )
-      .catch(() => next(new Error("Can't retrieve all roles")));
+      .catch((err) => {
+        console.error(err);
+
+        next(new Error("Can't retrieve all roles"));
+      });
   } catch (err) {
     next(new Error("Coudn't retrieve roles"));
   }

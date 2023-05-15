@@ -5,6 +5,7 @@ const fs = require("fs");
 const idpConfig = require("../configs/config");
 const User = require("../Models/User");
 const env = require("../configs/dev");
+const Role = require("../Models/Role");
 
 passport.serializeUser((req, user, done) => {
   done(null, user._id);
@@ -18,7 +19,9 @@ passport.deserializeUser((id, done) => {
     if (err) {
       done(err);
     }
-    done(null, user._id);
+    console.log("id", id);
+    done(null, user?._id);
+    // done(null, user);
   });
 });
 
@@ -39,26 +42,39 @@ if (fs.existsSync(idpCertificate)) {
         callbackUrl: "http://localhost:5000/api/v1/user/login/callback",
       },
       (profile, done) => {
-        User.findOne({ email: profile.email }, (err, user) => {
+        User.findOne({ email: profile.email }, async (err, user) => {
           if (err) {
             console.log("errors", err);
             return done(err);
           }
           if (!user) {
+            const email = profile.email.toString().slice("@")[1];
+            const role = await Role.find({});
+            let specificRole;
+            if (email === "n") {
+              specificRole = role.filter((value) => value.title === "user");
+            } else {
+              specificRole = role.filter((value) => value.title === "admin");
+            }
+            const { _id } = specificRole[0];
+
             User.create(
               {
+                ...profile,
                 email: profile.email,
                 uid: profile.uid,
                 state: profile.state,
                 organization: profile.organization,
                 firstName: profile.firstName,
                 lastName: profile.lastName,
+                role: _id,
                 areasOfExpertise: profile.areasOfExpertise,
                 profilePic: profile.profilePic,
               },
               (error, newUser) => {
                 if (error) {
-                  return done(err);
+                  console.log("error", error);
+                  return done(err, null);
                 }
                 return done(null, newUser);
               }

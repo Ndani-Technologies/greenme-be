@@ -9,15 +9,14 @@ UserRouter.post(
   "/login/callback",
   bodyParser.urlencoded({ extended: false }),
   passport.authenticate("login-saml", {
-    failureRedirect: "/login",
+    failureRedirect: "/api/v1/user/login",
     failureMessage: "error",
   }),
   userController.loginCallback
 );
+UserRouter.get("/login", passport.authenticate("login-saml"));
 
 UserRouter.get("/getLoggedInUser", userController.getLoggedInUser);
-
-UserRouter.get("/login", passport.authenticate("login-saml"));
 
 UserRouter.get("/signup", passport.authenticate("register-saml"));
 
@@ -35,7 +34,7 @@ UserRouter.get("/login", passport.authenticate("login-saml"));
 
 UserRouter.get("/signup", passport.authenticate("register-saml"));
 
-UserRouter.post("/logout", userController.logoutUser);
+UserRouter.get("/logout", userController.logoutUser);
 /**
  * @swagger
  * components:
