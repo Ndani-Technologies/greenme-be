@@ -15,7 +15,7 @@ const mongoose = require("mongoose");
 const healthcheck = require("./Routes/healthcheck");
 const passport = require("./middleware/passport");
 const UserRouter = require("./Routes/UsersRouter");
-const env = require("./configs/dev");
+const env = require("./configs/index");
 const roleRouter = require("./Routes/RoleRouter");
 const permissionRouter = require("./Routes/PermissionRouter");
 

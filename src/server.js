@@ -1,5 +1,5 @@
 const app = require("./app");
-const env = require("./configs/dev");
+const env = require("./configs/index");
 const logger = require("./middleware/logger");
 
 const { host, port } = env;

@@ -1,7 +1,8 @@
-const devEnv = {
+const indexENV = {
   host: process.env.HOST || "localhost",
   port: process.env.PORT || 5000,
   secrectKey: process.env.SECRET_KEY,
+  entity: process.env.ENTITY,
   mongoUrl: process.env.MONGO_URL,
   mongoUrlRemote: process.env.MONGO_URL_REMOTE,
   timezoneKey: process.env.TIMEZONE_KEY,
@@ -14,4 +15,4 @@ const devEnv = {
   Register_Callback: process.env.REGISTER_CALLBACK,
 };
 
-module.exports = devEnv;
+module.exports = indexENV;
