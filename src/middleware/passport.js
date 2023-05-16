@@ -70,7 +70,6 @@ passport.use(
             },
             (error, newUser) => {
               if (error) {
-                console.log("error", error);
                 return done(error, null);
               }
               return done(null, newUser);

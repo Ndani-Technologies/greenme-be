@@ -17,7 +17,7 @@ const getAllPermissions = async (req, res, next) => {
     }
     Permissions.find({})
       .then(
-        (permisssions) => {
+        async (permisssions) => {
           if (permisssions === "") {
             res.status(404).json({
               success: false,
@@ -36,7 +36,7 @@ const getAllPermissions = async (req, res, next) => {
           if (permisssions.length <= cacheLength) {
             redisClient.del(cacheKey);
             redisClient.set(cacheKey, JSON.stringify(permisssions));
-            cache = redisClient.get(cacheKey);
+            cache = await redisClient.get(cacheKey);
             res.status(200).json({
               success: true,
               message: "permissions found",
@@ -91,10 +91,10 @@ const updatePermission = (req, res, next) => {
     { new: true }
   )
     .then(
-      () => {
-        redisClient.del(cacheKey);
-        const allPermissions = Permissions.find({});
-        redisClient.set(cacheKey, JSON.stringify(allPermissions));
+      async () => {
+        await redisClient.del(cacheKey);
+        const allPermissions = await Permissions.find({});
+        await redisClient.set(cacheKey, JSON.stringify(allPermissions));
         res.statusCode = 200;
         res.setHeader("Content-Type", "application/json");
         res.json({ success: true, message: "Permission updated" });
@@ -112,10 +112,10 @@ const deletePermission = async (req, res, next) => {
   }
   Permissions.findByIdAndDelete(req.params.id)
     .then(
-      () => {
-        redisClient.del(cacheKey);
-        const allPermissions = Permissions.find({});
-        redisClient.set(cacheKey, JSON.stringify(allPermissions));
+      async () => {
+        await redisClient.del(cacheKey);
+        const allPermissions = await Permissions.find({});
+        await redisClient.set(cacheKey, JSON.stringify(allPermissions));
         res.statusCode = 200;
         res.setHeader("Content-Type", "application/json");
         res.json({ success: true, message: "Permission deleted" });

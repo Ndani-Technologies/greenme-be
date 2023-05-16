@@ -21,8 +21,8 @@ const loginCallback = async (req, res) => {
   session.userLogin = user;
   const message = { msg: "ssoComplete" };
   const serializeMsg = JSON.stringify(user);
-  const script = `window.opener.postMessage(${serializeMsg}, '*');`;
-  res.send(`<script>${script}</script>`);
+  const script = `window.postMessage( ${serializeMsg} , '*');`;
+  res.send(`<body><script>${script};</script></body>`);
 };
 const getLoggedInUser = async (req, res, next) => {
   try {
@@ -146,7 +146,7 @@ const getAllUsers = async (req, res, next) => {
           res.status(200).json({
             success: true,
             message: "Users found",
-            data: users,
+            data: JSON.parse(cache),
           });
         }
       });
@@ -254,9 +254,9 @@ const userUpdate = async (req, res, next) => {
 
   user
     .save()
-    .then(() => {
-      redisClient.del(cacheKey);
-      const allUsers = User.find()
+    .then(async () => {
+      await redisClient.del(cacheKey);
+      const allUsers = await User.find()
         .populate("role")
         .populate({
           path: "role",
@@ -265,7 +265,7 @@ const userUpdate = async (req, res, next) => {
             model: "Permissions",
           },
         });
-      redisClient.set(cacheKey, JSON.stringify(allUsers));
+      await redisClient.set(cacheKey, JSON.stringify(allUsers));
       res.status(200).json({ success: true, message: "User updated" });
     })
     .catch((err) => next(err));
@@ -283,9 +283,9 @@ const userDelete = async (req, res, next) => {
   }
   User.findByIdAndDelete(req.params.id)
     .then(
-      () => {
+      async () => {
         redisClient.del(cacheKey);
-        const allUsers = User.find()
+        const allUsers = await User.find()
           .populate("role")
           .populate({
             path: "role",
@@ -294,7 +294,7 @@ const userDelete = async (req, res, next) => {
               model: "Permissions",
             },
           });
-        redisClient.set(cacheKey, JSON.stringify(allUsers));
+        await redisClient.set(cacheKey, JSON.stringify(allUsers));
         res.statusCode = 200;
         res.setHeader("Content-Type", "application/json");
         res.json({ success: true, message: "User Deleted" });
