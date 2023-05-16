@@ -1,26 +1,48 @@
 const { redisClient } = require("../middleware/redisClient");
 const Permissions = require("../Models/Permission");
 
+const cacheKey = "PERMISSION";
+
 const getAllPermissions = async (req, res, next) => {
   try {
-    const cache = await redisClient.get("PERMISSION");
-    if (cache) {
-      res.status(200).json({
-        success: true,
-        message: "Permissions retrieved",
-        data: JSON.parse(cache),
-      });
-      return;
+    let cache = await redisClient.get(cacheKey);
+    let cacheObj = "";
+    let cacheLength = 0;
+    if (cache != null) {
+      cacheObj = JSON.parse(cache);
+      cacheLength = Object.keys(cacheObj).length;
+    } else {
+      cacheLength = 0;
+      cacheObj = "";
     }
     Permissions.find({})
       .then(
         (permisssions) => {
-          redisClient.set("PERMISSION", JSON.stringify(permisssions));
-          res.status(200).json({
-            success: true,
-            message: "Permissions retrieved",
-            data: permisssions,
-          });
+          if (permisssions === "") {
+            res.status(404).json({
+              success: false,
+              message: "permissions not found",
+            });
+            return;
+          }
+          if (permisssions.length > cacheLength) {
+            redisClient.set("PERMISSION", JSON.stringify(permisssions));
+            res.status(200).json({
+              success: true,
+              message: "permissions found",
+              data: permisssions,
+            });
+          }
+          if (permisssions.length <= cacheLength) {
+            redisClient.del(cacheKey);
+            redisClient.set(cacheKey, JSON.stringify(permisssions));
+            cache = redisClient.get(cacheKey);
+            res.status(200).json({
+              success: true,
+              message: "permissions found",
+              data: JSON.parse(cache),
+            });
+          }
         },
         (err) => next(err)
       )
@@ -30,6 +52,13 @@ const getAllPermissions = async (req, res, next) => {
   }
 };
 const createPermission = (req, res, next) => {
+  if (req.body.title === "") {
+    res.status(404).json({
+      success: false,
+      message: "title must not be empty",
+    });
+    return;
+  }
   const newPermission = new Permissions({
     title: req.body.title,
     route: req.body.route,
@@ -49,6 +78,13 @@ const createPermission = (req, res, next) => {
 };
 
 const updatePermission = (req, res, next) => {
+  if (req.body.title === "") {
+    res.status(404).json({
+      success: false,
+      message: "title must not be empty",
+    });
+    return;
+  }
   Permissions.findByIdAndUpdate(
     req.params.id,
     { $set: req.body },
@@ -56,6 +92,9 @@ const updatePermission = (req, res, next) => {
   )
     .then(
       () => {
+        redisClient.del(cacheKey);
+        const allPermissions = Permissions.find({});
+        redisClient.set(cacheKey, JSON.stringify(allPermissions));
         res.statusCode = 200;
         res.setHeader("Content-Type", "application/json");
         res.json({ success: true, message: "Permission updated" });
@@ -74,6 +113,9 @@ const deletePermission = async (req, res, next) => {
   Permissions.findByIdAndDelete(req.params.id)
     .then(
       () => {
+        redisClient.del(cacheKey);
+        const allPermissions = Permissions.find({});
+        redisClient.set(cacheKey, JSON.stringify(allPermissions));
         res.statusCode = 200;
         res.setHeader("Content-Type", "application/json");
         res.json({ success: true, message: "Permission deleted" });

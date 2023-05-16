@@ -2,8 +2,6 @@ const express = require("express");
 const path = require("path");
 require("dotenv/config");
 
-const healthcheck = require("./routes/healthcheck");
-
 const app = express();
 const cors = require("cors");
 
@@ -14,6 +12,7 @@ const swaggerUi = require("swagger-ui-express");
 const swaggerJSDoc = require("swagger-jsdoc");
 
 const mongoose = require("mongoose");
+const healthcheck = require("./Routes/healthcheck");
 const passport = require("./middleware/passport");
 const UserRouter = require("./Routes/UsersRouter");
 const env = require("./configs/dev");
@@ -41,7 +40,7 @@ app.use(
   })
 );
 
-app.use(cors());
+app.use(cors({ origin: "*" }));
 app.use(express.static("./assets"));
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.json({ extended: true }));
@@ -77,9 +76,11 @@ app.get("/api-docs.json", (req, res) => {
   res.setHeader("Content-Type", "application/json");
   res.send(swaggerSpec);
 });
-app.use("/user", UserRouter);
-app.use("/role", roleRouter);
-app.use("/permission", permissionRouter);
+app.use("/api/v1/user", UserRouter);
+
+app.use("/api/v1/role", roleRouter);
+app.use("/api/v1/permission", permissionRouter);
+app.use("/api/v1/", healthcheck);
 
 app.use((req, res, next) => {
   const err = new Error();
@@ -88,11 +89,18 @@ app.use((req, res, next) => {
   next(err);
 });
 
+app.use((err, req, res, next) => {
+  res.status(err.status || 500).json({
+    success: false,
+    message: err.message || "internal server error",
+  });
+  next();
+});
+
 // error handler
-app.use((err, req, res) => {
+app.use((err, req, res, next) => {
   let status = err.status || 500;
   let message = err.message || "Internal Server Error";
-  console.log("error", err);
 
   if (err.name === "MongoServerError" && err.code === 11000) {
     status = 400;
@@ -110,7 +118,5 @@ app.use((err, req, res) => {
     },
   });
 });
-
-app.use(healthcheck);
 
 module.exports = app;

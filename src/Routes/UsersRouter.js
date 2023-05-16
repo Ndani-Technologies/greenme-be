@@ -9,26 +9,32 @@ UserRouter.post(
   "/login/callback",
   bodyParser.urlencoded({ extended: false }),
   passport.authenticate("login-saml", {
-    failureRedirect: "/login",
+    failureRedirect: "/api/v1/user/login",
     failureMessage: "error",
   }),
   userController.loginCallback
 );
-
 UserRouter.get("/login", passport.authenticate("login-saml"));
+
+UserRouter.get("/getLoggedInUser", userController.getLoggedInUser);
 
 UserRouter.get("/signup", passport.authenticate("register-saml"));
 
 UserRouter.post(
   "/signup/callback",
   bodyParser.urlencoded({ extended: false }),
-  passport.authenticate("resgister-saml", {
+  passport.authenticate("register-saml", {
     failureRedirect: "/signup",
     failureMessage: "error",
   }),
   userController.registerCallback
 );
 
+UserRouter.get("/login", passport.authenticate("login-saml"));
+
+UserRouter.get("/signup", passport.authenticate("register-saml"));
+
+UserRouter.get("/logout", userController.logoutUser);
 /**
  * @swagger
  * components:
@@ -184,7 +190,7 @@ UserRouter.post(
  *         required: true
  *         type: string
  *     responses:
- *       204:
+ *       200:
  *         description: User deleted successfully
  *       404:
  *         description: User not found
@@ -194,12 +200,41 @@ UserRouter.post(
 
 UserRouter.get("/", userController.getAllUsers);
 
-UserRouter.get("/user:id", userController.getUserById);
+UserRouter.get("/getAllBenchmarks", userController.getAllBenchmarks);
+UserRouter.get("/getBenchmarkById/:id", userController.getBenchmarkById);
+
+UserRouter.get("/:id", userController.getUserById);
 
 UserRouter.post("/", userController.createUser);
 
 UserRouter.patch("/:id", userController.userUpdate);
 
 UserRouter.delete("/:id", userController.userDelete);
+
+UserRouter.get("/compare/id1/:id1/id2/:id2", userController.userTwoCompare);
+
+UserRouter.get(
+  "/compare/id1/:id1/id2/:id2/id3/:id3",
+  userController.userThreeCompare
+);
+
+UserRouter.get(
+  "/compare/id1/:id1/id2/:id2/id3/:id3/id4/:id4",
+  userController.userFourCompare
+);
+UserRouter.get(
+  "/organization/:organization",
+  userController.getUserByOrganization
+);
+
+UserRouter.post("/createBench", userController.createBenchmark);
+
+UserRouter.post("/createAnswerByUser", userController.createAnswerByUser);
+
+UserRouter.post("/createCategory", userController.createCategory);
+
+UserRouter.post("/createAnswers", userController.createAnswer);
+
+UserRouter.post("/createQuestions", userController.createQuestions);
 
 module.exports = UserRouter;

@@ -8,10 +8,7 @@ const userSchema = new mongoose.Schema(
       unique: true,
       required: true,
     },
-    username: {
-      type: String,
-    },
-    state: {
+    country: {
       type: String,
     },
     organization: {
@@ -24,16 +21,49 @@ const userSchema = new mongoose.Schema(
     lastName: {
       type: String,
     },
-    areaOfExpertise: [{ type: String }],
+    scope: [
+      {
+        type: String,
+        default: ["National Global Regional"],
+      },
+    ],
+    otherCountries: [
+      {
+        type: String,
+        default: ["Pakistan", "Iran", "Canada"],
+      },
+    ],
+    areaOfExpertise: [
+      {
+        type: String,
+      },
+    ],
     profilePic: { type: String },
     uid: { type: Number },
     role: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Role",
     },
+    position: {
+      type: String,
+      require: true,
+    },
     timezone: {
       type: String,
       default: "GMT",
+    },
+    phone: {
+      type: Number,
+    },
+    state: {
+      type: String,
+    },
+    leadScore: {
+      type: Number,
+    },
+    tags: {
+      type: String,
+      enum: ["Exiting", "Lead", "Long-term", "Partner"],
     },
   },
   { timestamps: true }
