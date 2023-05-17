@@ -21,7 +21,7 @@ const loginCallback = async (req, res) => {
   session.userLogin = user;
   const message = { msg: "ssoComplete" };
   const serializeMsg = JSON.stringify(user);
-  const script = `window.postMessage( ${serializeMsg} , '*');`;
+  const script = `window.opener.postMessage( ${serializeMsg} , '*');`;
   res.send(`<body><script>${script};</script></body>`);
 };
 const getLoggedInUser = async (req, res, next) => {
