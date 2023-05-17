@@ -18,7 +18,7 @@ const getAllRoles = async (req, res, next) => {
     Role.find({})
       .populate("permissions")
       .then(
-        (roles) => {
+        async (roles) => {
           if (roles === "") {
             res.status(404).json({
               success: false,
@@ -37,7 +37,8 @@ const getAllRoles = async (req, res, next) => {
           if (roles.length <= cacheLength) {
             redisClient.del(cacheKey);
             redisClient.set(cacheKey, JSON.stringify(roles));
-            cache = redisClient.get(cacheKey);
+            cache = await redisClient.get(cacheKey);
+
             res.status(200).json({
               success: true,
               message: "roles found",
@@ -85,10 +86,10 @@ const updateRole = (req, res, next) => {
   }
   Role.findByIdAndUpdate(req.params.id, { $set: req.body }, { new: true })
     .then(
-      () => {
-        redisClient.del(cacheKey);
-        const allRoles = Role.find({}).populate("permissions");
-        redisClient.set(cacheKey, JSON.stringify(allRoles));
+      async () => {
+        await redisClient.del(cacheKey);
+        const allRoles = await Role.find({}).populate("permissions");
+        await redisClient.set(cacheKey, JSON.stringify(allRoles));
         res.statusCode = 200;
         res.setHeader("Content-Type", "application/json");
         res.json({ success: true, message: "role updated" });
@@ -107,10 +108,10 @@ const deleteRole = async (req, res, next) => {
   }
   Role.findByIdAndDelete(req.params.id)
     .then(
-      () => {
-        redisClient.del(cacheKey);
-        const allRoles = Role.find({}).populate("permissions");
-        redisClient.set(cacheKey, JSON.stringify(allRoles));
+      async () => {
+        await redisClient.del(cacheKey);
+        const allRoles = await Role.find({}).populate("permissions");
+        await redisClient.set(cacheKey, JSON.stringify(allRoles));
         res.statusCode = 200;
         res.setHeader("Content-Type", "application/json");
         res.json({ success: true, message: "role deleted" });

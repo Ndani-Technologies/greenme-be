@@ -15,9 +15,10 @@ const mongoose = require("mongoose");
 const healthcheck = require("./Routes/healthcheck");
 const passport = require("./middleware/passport");
 const UserRouter = require("./Routes/UsersRouter");
-const env = require("./configs/dev");
+const env = require("./configs/index");
 const roleRouter = require("./Routes/RoleRouter");
 const permissionRouter = require("./Routes/PermissionRouter");
+const logger = require("./middleware/logger");
 
 const url = env.mongoUrl;
 const connect = mongoose.connect(url);
@@ -76,6 +77,11 @@ app.get("/api-docs.json", (req, res) => {
   res.setHeader("Content-Type", "application/json");
   res.send(swaggerSpec);
 });
+app.use((req, res, next) => {
+  // Log the request
+  logger.info(`[${req.method}] ${req.originalUrl}`);
+  next();
+});
 app.use("/api/v1/user", UserRouter);
 
 app.use("/api/v1/role", roleRouter);
@@ -90,6 +96,8 @@ app.use((req, res, next) => {
 });
 
 app.use((err, req, res, next) => {
+  logger.error(err.stack);
+
   res.status(err.status || 500).json({
     success: false,
     message: err.message || "internal server error",
