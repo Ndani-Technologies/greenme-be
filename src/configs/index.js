@@ -12,6 +12,7 @@ const devEnv = {
   IDP_Cert: process.env.IDP_CRT,
   Login_Callback: process.env.LOGIN_CALLBACK,
   Register_Callback: process.env.REGISTER_CALLBACK,
+  entity: process.env.ENTITY,
 };
 
 module.exports = devEnv;

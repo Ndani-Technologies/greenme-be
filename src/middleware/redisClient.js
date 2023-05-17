@@ -1,5 +1,5 @@
 const redis = require("redis");
-const dev = require("../configs/dev");
+const dev = require("../configs/index");
 
 let redisClient;
 const connectClient = async () => {

@@ -2,7 +2,7 @@ const axios = require("axios");
 const mongoose = require("mongoose");
 const session = require("express-session");
 const User = require("../Models/User");
-const env = require("../configs/dev");
+const env = require("../configs");
 const { redisClient } = require("../middleware/redisClient");
 
 const cacheKey = "USERS";
