@@ -66,7 +66,8 @@ const userSchema = new mongoose.Schema(
       enum: ["Exiting", "Lead", "Long-term", "Partner"],
     },
   },
-  { timestamps: true }
+  { timestamps: true },
+  { autoIndex: false }
 );
 userSchema.plugin(passportLocalMongoose);
 const User = mongoose.model("User", userSchema);

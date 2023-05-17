@@ -2,7 +2,6 @@ const indexENV = {
   host: process.env.HOST || "localhost",
   port: process.env.PORT || 5000,
   secrectKey: process.env.SECRET_KEY,
-  entity: process.env.ENTITY,
   mongoUrl: process.env.MONGO_URL,
   mongoUrlRemote: process.env.MONGO_URL_REMOTE,
   timezoneKey: process.env.TIMEZONE_KEY,
@@ -13,6 +12,7 @@ const indexENV = {
   IDP_Cert: process.env.IDP_CRT,
   Login_Callback: process.env.LOGIN_CALLBACK,
   Register_Callback: process.env.REGISTER_CALLBACK,
+  entity: process.env.ENTITY,
 };
 
 module.exports = indexENV;
