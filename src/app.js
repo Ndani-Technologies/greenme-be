@@ -82,11 +82,11 @@ app.use((req, res, next) => {
   logger.info(`[${req.method}] ${req.originalUrl}`);
   next();
 });
-app.use("/api/v1/user", UserRouter);
+app.use("/api/v1/auth/user", UserRouter);
 
-app.use("/api/v1/role", roleRouter);
-app.use("/api/v1/permission", permissionRouter);
-app.use("/api/v1/", healthcheck);
+app.use("/api/v1/auth/role", roleRouter);
+app.use("/api/v1/auth/permission", permissionRouter);
+app.use("/api/v1/auth", healthcheck);
 
 app.use((req, res, next) => {
   const err = new Error();
