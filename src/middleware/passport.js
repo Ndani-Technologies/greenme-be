@@ -35,8 +35,7 @@ passport.use(
       entryPoint: loginUrl,
       issuer: "passport-saml",
       cert: env.IDP_Cert,
-      // callbackUrl: env.Login_Callback,
-      callbackUrl: "http://localhost:5000/api/v1/user/login/callback",
+      callbackUrl: env.Login_Callback,
     },
     (profile, done) => {
       User.findOne({ email: profile.email }, async (err, user) => {
