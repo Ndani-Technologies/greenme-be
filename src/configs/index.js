@@ -1,4 +1,4 @@
-const devEnv = {
+const indexENV = {
   host: process.env.HOST || "localhost",
   port: process.env.PORT || 5000,
   secrectKey: process.env.SECRET_KEY,
@@ -15,4 +15,4 @@ const devEnv = {
   entity: process.env.ENTITY,
 };
 
-module.exports = devEnv;
+module.exports = indexENV;
