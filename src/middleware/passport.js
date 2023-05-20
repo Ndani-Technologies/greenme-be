@@ -31,7 +31,7 @@ passport.use(
   "login-saml",
   new SamlStrategy(
     {
-      path: "/api/v1/user/login/callback",
+      path: "/api/v1/auth/user/login/callback",
       entryPoint: loginUrl,
       issuer: "passport-saml",
       cert: env.IDP_Cert,
