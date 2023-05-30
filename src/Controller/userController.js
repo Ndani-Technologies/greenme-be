@@ -491,25 +491,8 @@ const createQuestions = async (req, res, next) => {
     next(err);
   }
 };
-const getAllBenchmarks = async (req, res, next) => {
-  try {
-    const response = await axios.get("http://localhost:5001/benchmarking");
-    res.json(response.data);
-  } catch (error) {
-    next(error);
-  }
-};
-const getBenchmarkById = async (req, res, next) => {
-  try {
-    const benchmarkid = req.params.id;
-    const response = await axios.get(
-      `http://localhost:5001/benchmarking/${benchmarkid}`
-    );
-    res.json(response.data);
-  } catch (error) {
-    next(error);
-  }
-};
+
+
 
 module.exports = {
   loginCallback,
@@ -528,8 +511,6 @@ module.exports = {
   createCategory,
   createAnswer,
   createQuestions,
-  getAllBenchmarks,
-  getBenchmarkById,
   logoutUser,
   getUserByOrganization,
 };
