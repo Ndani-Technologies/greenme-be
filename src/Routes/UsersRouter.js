@@ -200,9 +200,6 @@ UserRouter.get("/logout", userController.logoutUser);
 
 UserRouter.get("/", userController.getAllUsers);
 
-UserRouter.get("/getAllBenchmarks", userController.getAllBenchmarks);
-UserRouter.get("/getBenchmarkById/:id", userController.getBenchmarkById);
-
 UserRouter.get("/:id", userController.getUserById);
 
 UserRouter.post("/", userController.createUser);

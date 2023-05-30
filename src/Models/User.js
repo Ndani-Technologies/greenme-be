@@ -65,6 +65,9 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: ["Exiting", "Lead", "Long-term", "Partner"],
     },
+    banner: {
+      type: String,
+    },
   },
   { timestamps: true },
   { autoIndex: false }

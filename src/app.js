@@ -22,7 +22,6 @@ const logger = require("./middleware/logger");
 
 const url = env.mongoUrl;
 const connect = mongoose.connect(url);
-
 connect.then(
   () => {
     console.log("connected Correctly");
@@ -31,7 +30,6 @@ connect.then(
     console.error(err);
   }
 );
-
 app.use(
   expresssession({
     secret: env.secrectKey,
