@@ -303,51 +303,31 @@ const userDelete = async (req, res, next) => {
     )
     .catch((err) => next(err));
 };
-const userTwoCompare = async (req, res, next) => {
+
+const userCompare = async (req, res, next) => {
   try {
-    const userId1 = req.params.id1;
-    const userId2 = req.params.id2;
-    const users = await User.find({ _id: { $in: [userId1, userId2] } });
-    res.status(200).json({
-      success: true,
-      message: "Comparison successful",
-      data: users,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-const userThreeCompare = async (req, res, next) => {
-  try {
-    const userId1 = req.params.id1;
-    const userId2 = req.params.id2;
-    const userId3 = req.params.id3;
-    const users = await User.find({
-      _id: { $in: [userId1, userId2, userId3] },
-    });
-    res.status(200).json({
-      success: true,
-      message: "Comparison successful",
-      data: users,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-const userFourCompare = async (req, res, next) => {
-  try {
-    const userId1 = req.params.id1;
-    const userId2 = req.params.id2;
-    const userId3 = req.params.id3;
-    const userId4 = req.params.id4;
-    const users = await User.find({
-      _id: { $in: [userId1, userId2, userId3, userId4] },
-    });
-    res.status(200).json({
-      success: true,
-      message: "Comparison successful",
-      data: users,
-    });
+    const { id } = req.body;
+    const users = await User.find({ _id: { $in: id } })
+      .populate("role")
+      .populate({
+        path: "role",
+        populate: {
+          path: "permissions",
+          model: "Permissions",
+        },
+      });
+    if (users) {
+      res.status(200).json({
+        success: true,
+        message: "Comparison successful",
+        data: users,
+      });
+    } else {
+      res.status(404).json({
+        success: false,
+        message: "no user found",
+      });
+    }
   } catch (error) {
     next(error);
   }
@@ -492,8 +472,6 @@ const createQuestions = async (req, res, next) => {
   }
 };
 
-
-
 module.exports = {
   loginCallback,
   getAllUsers,
@@ -503,9 +481,6 @@ module.exports = {
   userDelete,
   registerCallback,
   getLoggedInUser,
-  userTwoCompare,
-  userThreeCompare,
-  userFourCompare,
   createBenchmark,
   createAnswerByUser,
   createCategory,
@@ -513,4 +488,5 @@ module.exports = {
   createQuestions,
   logoutUser,
   getUserByOrganization,
+  userCompare,
 };
