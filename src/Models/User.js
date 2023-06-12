@@ -65,6 +65,18 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: ["Exiting", "Lead", "Long-term", "Partner"],
     },
+    actionPoints: {
+      type: Number,
+      default: 0,
+    },
+    collaborationPoints: {
+      type: Number,
+      default: 0,
+    },
+    discussionPoints: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true },
   { autoIndex: false }

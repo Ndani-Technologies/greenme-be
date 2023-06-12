@@ -13,6 +13,7 @@ const indexENV = {
   Login_Callback: process.env.LOGIN_CALLBACK,
   Register_Callback: process.env.REGISTER_CALLBACK,
   entity: process.env.ENTITY,
+  usermoduleUrl: process.env.USER_MODULE_URL,
 };
 
 module.exports = indexENV;
