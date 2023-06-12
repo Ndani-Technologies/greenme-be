@@ -249,9 +249,7 @@ const userUpdate = async (req, res, next) => {
       }
     }
   }
-
   user.set(body);
-
   user
     .save()
     .then(async () => {
