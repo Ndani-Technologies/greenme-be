@@ -249,7 +249,15 @@ const userUpdate = async (req, res, next) => {
       }
     }
   }
-  user.actionPoints += req.body.actionPoints;
+  if (req.body.actionPoints) {
+    user.actionPoints += req.body.actionPoints;
+  }
+  if (req.body.collaborationPoints) {
+    user.collaborationPoints += req.body.collaborationPoints;
+  }
+  if (req.body.discussionPoints) {
+    user.discussionPoints += req.body.discussionPoints;
+  }
 
   user.set(body);
   user
