@@ -249,6 +249,8 @@ const userUpdate = async (req, res, next) => {
       }
     }
   }
+  user.actionPoints += req.body.actionPoints;
+
   user.set(body);
   user
     .save()
