@@ -39,11 +39,7 @@ const userSchema = new mongoose.Schema(
       },
     ],
     profilePic: { type: String },
-    backgroundPic: {
-      type: String,
-      default:
-        "https://knowledge.fleetforum.org/public/avatars/128x128_default-avatar.png",
-    },
+    backgroundPic: { type: String },
     uid: { type: Number },
     role: {
       type: mongoose.Schema.Types.ObjectId,
@@ -82,18 +78,21 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-    totalPoint: {
+    totalPoints: {
       type: Number,
+      // get(){
+      //   return (this.collaborationPoints + this.discussionPoints+ this.actionPoints);
+      // },
       default: 0,
     },
     leaderboardPosition: {
       type: Number,
-      default: 0,
     },
   },
   { timestamps: true },
   { autoIndex: false }
 );
+
 userSchema.plugin(passportLocalMongoose);
 const User = mongoose.model("User", userSchema);
 
