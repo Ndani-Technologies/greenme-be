@@ -39,6 +39,11 @@ const userSchema = new mongoose.Schema(
       },
     ],
     profilePic: { type: String },
+    backgroundPic: {
+      type: String,
+      default:
+        "https://knowledge.fleetforum.org/public/avatars/128x128_default-avatar.png",
+    },
     uid: { type: Number },
     role: {
       type: mongoose.Schema.Types.ObjectId,
@@ -74,6 +79,14 @@ const userSchema = new mongoose.Schema(
       default: 0,
     },
     discussionPoints: {
+      type: Number,
+      default: 0,
+    },
+    totalPoint: {
+      type: Number,
+      default: 0,
+    },
+    leaderboardPosition: {
       type: Number,
       default: 0,
     },
