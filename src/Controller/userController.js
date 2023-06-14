@@ -327,6 +327,7 @@ const userUpdate = async (req, res, next) => {
     }
   }
   if (req.body.actionPoints) {
+
     user.actionPoints = req.body.actionPoints;
   }
   if (req.body.collaborationPoints) {
@@ -343,6 +344,7 @@ const userUpdate = async (req, res, next) => {
   if (!req.body.totalPoint) {
     req.body.totalPoint = totalPoint;
   }
+
   user.set(body);
   user
     .save()

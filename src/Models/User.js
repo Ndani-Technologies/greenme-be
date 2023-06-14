@@ -88,6 +88,7 @@ const userSchema = new mongoose.Schema(
     leaderboardPosition: {
       type: Number,
     },
+
   },
   { timestamps: true },
   { autoIndex: false }
