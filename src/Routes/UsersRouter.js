@@ -209,6 +209,8 @@ UserRouter.patch("/:id", userController.userUpdate);
 UserRouter.delete("/:id", userController.userDelete);
 
 UserRouter.post("/compare/compareUsers", userController.userCompare);
+
+
 UserRouter.get(
   "/organization/:organization",
   userController.getUserByOrganization
