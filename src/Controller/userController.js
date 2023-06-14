@@ -7,6 +7,83 @@ const { redisClient } = require("../middleware/redisClient");
 
 const cacheKey = "USERS";
 
+const getTotalPoints = async (req, res, next) => {
+  try {
+    const users = await User.find()
+      .populate("role")
+      .populate({
+        path: "role",
+        populate: {
+          path: "permissions",
+          model: "Permissions",
+        },
+      })
+      .exec();
+
+    if (users.length === 0) {
+      res.status(404).json({
+        success: false,
+        message: "Users not found",
+      });
+      return;
+    }
+
+    // eslint-disable-next-line no-restricted-syntax
+    for (const user of users) {
+      const totalPoint =
+        user.collaborationPoints + user.discussionPoints + user.actionPoints;
+      user.totalPoint = totalPoint;
+      // eslint-disable-next-line no-await-in-loop
+      await user.save();
+    }
+    users.sort((a, b) => b.totalPoint - a.totalPoint);
+
+    users.forEach(async (user, index) => {
+      // eslint-disable-next-line no-param-reassign
+      user.leaderboardPosition = index + 1;
+      await user.save();
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Users found",
+      data: users,
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: "error",
+    });
+  }
+};
+const updatePoints = async (req, res, next) => {
+  const userId = req.params.id;
+  const totalPoint =
+    req.body.discussionPoints +
+    req.body.collaborationPoints +
+    req.body.actionPoints;
+  req.body.totalPoint = totalPoint;
+  try {
+    const user = await User.findByIdAndUpdate(userId, req.body, {
+      new: true,
+    }).exec();
+
+    if (!user) {
+      res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+      return;
+    }
+    res.status(200).json({
+      success: true,
+      message: "User updated successfully",
+      data: user,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
 const loginCallback = async (req, res) => {
   const userLogin = "";
   const user = await User.findById(req.user._id)
@@ -250,13 +327,22 @@ const userUpdate = async (req, res, next) => {
     }
   }
   if (req.body.actionPoints) {
-    user.actionPoints += req.body.actionPoints;
+
+    user.actionPoints = req.body.actionPoints;
   }
   if (req.body.collaborationPoints) {
-    user.collaborationPoints += req.body.collaborationPoints;
+    user.collaborationPoints = req.body.collaborationPoints;
   }
   if (req.body.discussionPoints) {
-    user.discussionPoints += req.body.discussionPoints;
+    user.discussionPoints = req.body.discussionPoints;
+  }
+  const totalPoint =
+    user.actionPoints + user.collaborationPoints + user.discussionPoints;
+  if (req.body.totalPoint && req.body.totalPoint !== totalPoint) {
+    req.body.totalPoint = totalPoint;
+  }
+  if (!req.body.totalPoint) {
+    req.body.totalPoint = totalPoint;
   }
 
   user.set(body);
@@ -274,6 +360,7 @@ const userUpdate = async (req, res, next) => {
           },
         });
       await redisClient.set(cacheKey, JSON.stringify(allUsers));
+
       res.status(200).json({ success: true, message: "User updated" });
     })
     .catch((err) => next(err));
@@ -479,7 +566,6 @@ const createQuestions = async (req, res, next) => {
     next(err);
   }
 };
-
 module.exports = {
   loginCallback,
   getAllUsers,
@@ -497,4 +583,6 @@ module.exports = {
   logoutUser,
   getUserByOrganization,
   userCompare,
+  getTotalPoints,
+  updatePoints,
 };

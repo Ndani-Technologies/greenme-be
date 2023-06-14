@@ -39,6 +39,7 @@ const userSchema = new mongoose.Schema(
       },
     ],
     profilePic: { type: String },
+    backgroundPic: { type: String },
     uid: { type: Number },
     role: {
       type: mongoose.Schema.Types.ObjectId,
@@ -77,10 +78,22 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    totalPoints: {
+      type: Number,
+      // get(){
+      //   return (this.collaborationPoints + this.discussionPoints+ this.actionPoints);
+      // },
+      default: 0,
+    },
+    leaderboardPosition: {
+      type: Number,
+    },
+
   },
   { timestamps: true },
   { autoIndex: false }
 );
+
 userSchema.plugin(passportLocalMongoose);
 const User = mongoose.model("User", userSchema);
 
