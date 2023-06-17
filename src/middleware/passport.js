@@ -31,7 +31,7 @@ passport.use(
   "login-saml",
   new SamlStrategy(
     {
-      path: "/api/v1/user/login/callback",
+      path: "/api/v1/auth/user/login/callback",
       entryPoint: loginUrl,
       issuer: "passport-saml",
       cert: env.IDP_Cert,
@@ -44,13 +44,13 @@ passport.use(
           return done(err);
         }
         if (!user) {
-          const email = profile.email.toString().slice("@")[1];
+          const email = profile.email.toString().split("@")[1];
           const role = await Role.find({});
           let specificRole;
-          if (email === "n") {
-            specificRole = role.filter((value) => value.title === "user");
-          } else {
+          if (email === "fleetforum.org") {
             specificRole = role.filter((value) => value.title === "admin");
+          } else {
+            specificRole = role.filter((value) => value.title === "user");
           }
           const { _id } = specificRole[0];
 

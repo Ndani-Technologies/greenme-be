@@ -200,9 +200,6 @@ UserRouter.get("/logout", userController.logoutUser);
 
 UserRouter.get("/", userController.getAllUsers);
 
-UserRouter.get("/getAllBenchmarks", userController.getAllBenchmarks);
-UserRouter.get("/getBenchmarkById/:id", userController.getBenchmarkById);
-
 UserRouter.get("/:id", userController.getUserById);
 
 UserRouter.post("/", userController.createUser);
@@ -211,17 +208,9 @@ UserRouter.patch("/:id", userController.userUpdate);
 
 UserRouter.delete("/:id", userController.userDelete);
 
-UserRouter.get("/compare/id1/:id1/id2/:id2", userController.userTwoCompare);
+UserRouter.post("/compare/compareUsers", userController.userCompare);
 
-UserRouter.get(
-  "/compare/id1/:id1/id2/:id2/id3/:id3",
-  userController.userThreeCompare
-);
 
-UserRouter.get(
-  "/compare/id1/:id1/id2/:id2/id3/:id3/id4/:id4",
-  userController.userFourCompare
-);
 UserRouter.get(
   "/organization/:organization",
   userController.getUserByOrganization
