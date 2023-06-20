@@ -163,18 +163,7 @@ const logoutUser = async (req, res, next) => {
       // Redirect to the login page or send a success response
       res.json({ status: 200, message: "Logout successful" });
     });
-    // res.redirect("/");
   });
-  // req.logout();
-  // req.session.destroy((err) => {
-  //   if (err) {
-  //     res.status(404).json({ error: "Failed to logout" });
-  //     return;
-  //   }
-  //   // Redirect to the login page or send a success response
-  //   res.json({ status: 200, message: "Logout successful" });
-  // }
-  // );
 };
 const registerCallback = async (req, res) => {
   res.json({ user: req.user });
@@ -274,13 +263,10 @@ const createUser = async (req, res, next) => {
           .json({ success: true, message: "User created", data: newUser });
       },
       (err) => {
-        console.log("errr2", err);
-
         next(err);
       }
     )
     .catch((err) => {
-      console.log("errr", err);
       next(err);
     });
 };
@@ -327,7 +313,6 @@ const userUpdate = async (req, res, next) => {
     }
   }
   if (req.body.actionPoints) {
-
     user.actionPoints = req.body.actionPoints;
   }
   if (req.body.collaborationPoints) {
