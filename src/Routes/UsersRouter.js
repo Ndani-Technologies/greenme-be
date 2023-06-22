@@ -214,7 +214,8 @@ UserRouter.get(
   "/organization/:organization",
   userController.getUserByOrganization
 );
-
+UserRouter.get("/get/getTotalPoints", userController.getTotalPoints);
+UserRouter.patch("/update/updatePoints/:id", userController.updatePoints);
 UserRouter.post("/createBench", userController.createBenchmark);
 
 UserRouter.post("/createAnswerByUser", userController.createAnswerByUser);
