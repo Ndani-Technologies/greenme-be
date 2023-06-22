@@ -12,6 +12,7 @@ const swaggerUi = require("swagger-ui-express");
 const swaggerJSDoc = require("swagger-jsdoc");
 
 const mongoose = require("mongoose");
+const http = require("http");
 const healthcheck = require("./Routes/healthcheck");
 const passport = require("./middleware/passport");
 const UserRouter = require("./Routes/UsersRouter");
@@ -19,6 +20,11 @@ const env = require("./configs/index");
 const roleRouter = require("./Routes/RoleRouter");
 const permissionRouter = require("./Routes/PermissionRouter");
 const logger = require("./middleware/logger");
+const socketServer = require("./socketServer");
+
+const server = http.createServer(app);
+socketServer.registerSocketServer(server);
+const ChatRouter = require("./Routes/chatRoutes");
 
 const url = env.mongoUrl;
 const connect = mongoose.connect(url);
@@ -87,6 +93,7 @@ app.use("/api/v1/auth/user", UserRouter);
 app.use("/api/v1/auth/role", roleRouter);
 app.use("/api/v1/auth/permission", permissionRouter);
 app.use("/api/v1/auth", healthcheck);
+app.use("/api/v1/auth/chat", ChatRouter);
 
 app.use((req, res, next) => {
   const err = new Error();
@@ -127,4 +134,4 @@ app.use((err, req, res, next) => {
   });
 });
 
-module.exports = app;
+module.exports = server;
